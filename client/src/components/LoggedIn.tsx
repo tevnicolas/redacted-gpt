@@ -1,24 +1,24 @@
 import { Link } from 'react-router-dom';
 import { Button } from './Button';
-import { useState } from 'react';
 
 type LoggedInProps = {
   status: boolean;
+  loginBox: boolean;
+  onClick: () => void;
 };
 
-export function LoggedIn({ status }: LoggedInProps) {
-  const [openForm, setOpenForm] = useState(false);
+export function LoggedIn({ status, loginBox, onClick }: LoggedInProps) {
   return (
     <>
       <div
-        onClick={() => setOpenForm((prev) => !prev)}
+        onClick={onClick}
         className="flex justify-center items-center cursor-pointer mt-[14px] bg-myyellow rounded-[40px] w-[70px] h-10">
         <h2 className="font-Righteous text-[14px]">
           {status ? 'Acc.' : 'Login'}
         </h2>
       </div>
-      {openForm && (
-        <div className="flex flex-wrap justify-end absolute top-[105px] w-[200px]">
+      {loginBox && (
+        <div className="flex flex-wrap justify-end absolute top-[98px] w-[200px] [@media(width<=767px)]:right-[130px] [@media(width<=335px)]:left-[20px]">
           <div className="h-0 w-0 border-x-[8px] border-x-transparent border-b-[13px] border-b-black mr-[10px] mb-[5px]"></div>
           <div className="bg-mywhite rounded-[18px] w-full">
             <form className="m-[15px]">
