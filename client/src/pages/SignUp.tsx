@@ -1,4 +1,4 @@
-import { LoginEntry } from '../components/LoggedIn';
+import { UserPassEntry } from '../components/LogIn';
 import { Button } from '../components/Button';
 
 export function SignUp() {
@@ -16,10 +16,10 @@ export function SignUp() {
             </p>
           </div>
           <div className="flex mb-[40px] text-[22px]">
-            <LoginEntry type="user" size={15} />
+            <UserPassEntry type="user" size={15} />
           </div>
           <div className="flex mb-[20px] text-[22px]">
-            <LoginEntry type="password" size={15} />
+            <UserPassEntry type="password" size={15} />
           </div>
           <div className="flex justify-center mb-[40px] mt-[50px]">
             <div className="flex justify-between w-[200px]">

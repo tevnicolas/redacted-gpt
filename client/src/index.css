@@ -78,7 +78,7 @@ html {
   justify-content: center;
   align-items: center;
   background-color: black;
-  overflow: visible;
+  overflow-y: scroll;
 }
 
 body {
@@ -90,7 +90,7 @@ body {
   width: 100%;
   height: 95vh;
   align-items: start;
-  overflow: visible;
+  overflow-y: scroll;
 }
 
 h1 {

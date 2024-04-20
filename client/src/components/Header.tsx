@@ -1,22 +1,22 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { LoggedIn } from './LoggedIn';
+import { LogIn, Triangle } from './LogIn';
 import { LuMenuSquare } from 'react-icons/lu';
 import { useState } from 'react';
 
 export function Header() {
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [loginBox, setLoginBox] = useState(false);
+  const [mobileMenuDropdown, setMobileMenuDropdown] = useState(false);
+  const [loginDropdown, setLoginDropdown] = useState(false);
 
   function handleLoginClick() {
-    setLoginBox((prev) => !prev);
-    if (mobileMenu) {
-      setMobileMenu(false);
+    setLoginDropdown((prev) => !prev);
+    if (mobileMenuDropdown) {
+      setMobileMenuDropdown(false);
     }
   }
   function handleMobileClick() {
-    setMobileMenu((prev) => !prev);
-    if (loginBox) {
-      setLoginBox(false);
+    setMobileMenuDropdown((prev) => !prev);
+    if (loginDropdown) {
+      setLoginDropdown(false);
     }
   }
 
@@ -35,9 +35,9 @@ export function Header() {
           </div>
         </div>
         <div className="flex flex-nowrap justify-end [@media(width<=767px)]:justify-start w-[120px] min-w-[120px]">
-          <LoggedIn
+          <LogIn
             status={false}
-            loginBox={loginBox}
+            loginDropdown={loginDropdown}
             onClick={handleLoginClick}
           />
           <div className="hidden [@media(width<=767px)]:block m-[14px]">
@@ -48,12 +48,15 @@ export function Header() {
           </div>
         </div>
       </div>
-      {mobileMenu && (
-        <div className="hidden z-10 [@media(width<=767px)]:flex flex flex-wrap items-center justify-center fixed bg-mywhite top-[100px] right-[75px] w-[20vw] min-w-[150px] h-[350px] rounded-[20px]">
-          <Page text="Home" />
-          <Page text="Filter Sets" />
-          <Page text="About" />
-          <Page text="Support" />
+      {mobileMenuDropdown && (
+        <div className="hidden [@media(width<=767px)]:flex flex flex-wrap justify-end absolute top-[80px] right-[49px]">
+          <Triangle />
+          <div className="z-10 flex flex-wrap items-center justify-center bg-mywhite w-[20vw] min-w-[150px] h-[350px] rounded-[20px]">
+            <Page text="Home" />
+            <Page text="Filter Sets" />
+            <Page text="About" />
+            <Page text="Support" />
+          </div>
         </div>
       )}
       <Outlet />

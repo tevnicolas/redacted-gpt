@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from './Button';
 
-type LoggedInProps = {
+type LogInProps = {
   status: boolean;
-  loginBox: boolean;
+  loginDropdown: boolean;
   onClick: () => void;
 };
 
-export function LoggedIn({ status, loginBox, onClick }: LoggedInProps) {
+export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
   return (
     <>
       <div
@@ -17,13 +17,13 @@ export function LoggedIn({ status, loginBox, onClick }: LoggedInProps) {
           {status ? 'Acc.' : 'Login'}
         </h2>
       </div>
-      {loginBox && (
-        <div className="flex flex-wrap justify-end absolute top-[98px] w-[200px] [@media(width<=767px)]:right-[130px] [@media(width<=335px)]:left-[20px]">
-          <div className="h-0 w-0 border-x-[8px] border-x-transparent border-b-[13px] border-b-black mr-[10px] mb-[5px]"></div>
+      {loginDropdown && (
+        <div className="flex flex-wrap justify-end absolute top-[80px] w-[200px] right-[49px] [@media(width<=767px)]:right-[108px] [@media(width<=335px)]:left-[20px]">
+          <Triangle />
           <div className="bg-mywhite rounded-[18px] w-full">
             <form className="m-[15px]">
-              <LoginEntry type="user" size={11} />
-              <LoginEntry type="password" size={11} />
+              <UserPassEntry type="user" size={11} />
+              <UserPassEntry type="password" size={11} />
               <div className="flex justify-between m-[10px]">
                 <Button text="Login" />
                 <Link to="/sign-up">
@@ -39,12 +39,12 @@ export function LoggedIn({ status, loginBox, onClick }: LoggedInProps) {
   );
 }
 
-type EntryProps = {
+type UserPassEntryProps = {
   type: string;
   size: number;
 };
 
-export function LoginEntry({ type, size }: EntryProps) {
+export function UserPassEntry({ type, size }: UserPassEntryProps) {
   return (
     <div className="flex items-center m-[5px]">
       <div className="min-w-[50px]">
@@ -57,6 +57,14 @@ export function LoginEntry({ type, size }: EntryProps) {
         size={size}
         className="bg-myconcrete pl-1 pr-1 max-h-[22px]"
       />
+    </div>
+  );
+}
+
+export function Triangle() {
+  return (
+    <div className="flex w-full justify-end">
+      <div className="h-0 w-0 border-x-[8px] border-x-transparent border-b-[13px] border-b-black mr-[10px] mb-[5px]" />
     </div>
   );
 }
