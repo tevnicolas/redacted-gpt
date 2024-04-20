@@ -9,25 +9,25 @@ export function Prompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxHeight = 200;
 
-  function adjustHeight() {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = '40px'; // Set to the default height
-      const isContentLessThanDefault = textarea.scrollHeight <= 64; // Adjust as per the observed default scrollHeight
-      if (!text || isContentLessThanDefault) {
-        // If there is no text and content is less than the default height, set a small fixed height
-        textarea.style.height = '40px';
-      } else {
-        // When there is text, let it auto-calculate
-        textarea.style.height = '40px';
-        const currentScrollHeight = textarea.scrollHeight;
-        // Set the height to the larger of the scrollHeight and maxHeight
-        textarea.style.height = `${Math.min(currentScrollHeight, maxHeight)}px`;
+  useEffect(() => {
+    function adjustHeight() {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = '40px'; // Set to the default height
+        const isContentLessThanDefault = textarea.scrollHeight <= 64; // Adjust as per the observed default scrollHeight
+        if (!text || isContentLessThanDefault) {
+          // If there is no text or content is less than the default height, set a small fixed height
+          textarea.style.height = '40px';
+        } else {
+          const currentScrollHeight = textarea.scrollHeight;
+          // Set the height to the larger of the scrollHeight and maxHeight
+          textarea.style.height = `${Math.min(
+            currentScrollHeight,
+            maxHeight
+          )}px`;
+        }
       }
     }
-  }
-
-  useEffect(() => {
     adjustHeight();
   }, [text]);
 
@@ -46,7 +46,6 @@ export function Prompt() {
             placeholder="Select filter set and message Redacted GPT"
             onChange={(e) => {
               setText(e.currentTarget.value);
-              adjustHeight();
             }}
             rows={1}
             value={text}
