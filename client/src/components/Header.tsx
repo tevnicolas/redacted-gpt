@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { LogIn, Triangle } from './LogIn';
 import { LuMenuSquare } from 'react-icons/lu';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { FadeInWrapper } from './FadeInWrapper';
 
 export function Header() {
@@ -9,18 +9,19 @@ export function Header() {
   const [mobileMenuDropdown, setMobileMenuDropdown] = useState(false);
   const [loginDropdown, setLoginDropdown] = useState(false);
 
-  function handleLoginClick() {
+  const handleLoginClick = useCallback(() => {
     setLoginDropdown((prev) => !prev);
     if (mobileMenuDropdown) {
       setMobileMenuDropdown(false);
     }
-  }
-  function handleMobileClick() {
+  }, [mobileMenuDropdown]);
+
+  const handleMobileClick = useCallback(() => {
     setMobileMenuDropdown((prev) => !prev);
     if (loginDropdown) {
       setLoginDropdown(false);
     }
-  }
+  }, [loginDropdown]);
 
   return (
     <>
@@ -89,7 +90,7 @@ function Page({ text }: PageProps) {
           ? '/about'
           : '/support'
       }>
-      <h2 className="text-black text-[15px]">{text}</h2>
+      <h2 className="text-black text-[15px] select-none">{text}</h2>
     </NavLink>
   );
 }

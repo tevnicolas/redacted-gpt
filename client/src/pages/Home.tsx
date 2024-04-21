@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export function Home() {
   const [error, setError] = useState<unknown>();
   //displayText state
-  //isRedacted state
+  const [isRedacted, setIsRedacted] = useState(false);
 
   if (error) {
     return (
@@ -27,8 +27,8 @@ export function Home() {
       />
       <form className="flex justify-center items-center w-full m-[35px]">
         <Prompt onError={setError} />
-        <SelectFilterSet />
-        <RedactPrompt isRedacted={false} />
+        <SelectFilterSet isNone={setIsRedacted} />
+        <RedactPrompt isRedacted={isRedacted} />
       </form>
     </>
   );
@@ -97,11 +97,20 @@ function Prompt({ onError }: PromptProps) {
   );
 }
 
-function SelectFilterSet() {
+type SelectFilterSetProps = {
+  isNone: (value: boolean) => void;
+};
+
+function SelectFilterSet({ isNone }: SelectFilterSetProps) {
   const navigate = useNavigate();
   const [filterSet, setFilterSet] = useState('');
   if (filterSet === 'Create') {
     navigate('/filter-sets');
+  }
+  if (filterSet === 'None') {
+    isNone(true);
+  } else {
+    isNone(false);
   }
   return (
     <div>
@@ -109,11 +118,12 @@ function SelectFilterSet() {
         name="filterSets"
         value={filterSet}
         onChange={(e) => setFilterSet(e.currentTarget.value)}
-        className="flex items-center text-center text-mywhite rounded-[40px] p-1 ml-1 mr-1 border-[5.5px] border-black w-[98px] min-w-[98px] text-[15px] h-[40px] bg-black select-none">
+        className="flex items-center text-center text-mywhite rounded-[40px] p-1 ml-1 mr-1 border-[5.5px] border-black w-[98px] min-w-[98px] max-w-[98px] text-[15px] h-[40px] bg-black select-none">
         <option className="hidden" value="">
           Filter Set
         </option>
-        <option value="">None</option>
+        <option value=""></option>
+        <option value="None">None</option>
         <option value="Create">+Create Filter Set</option>
       </select>
     </div>
@@ -127,17 +137,19 @@ type RedactPromptProps = {
 function RedactPrompt({ isRedacted }: RedactPromptProps) {
   let styles = '';
   if (isRedacted) {
-    styles = 'bg-myyellow border-myyellow text-black hover:border-black';
+    styles =
+      'bg-myyellow border-myyellow text-black hover:bg-green-600 hover:border-green-600 hover:text-white';
   } else {
-    styles = 'bg-black border-black text-mywhite hover:border-mywhite';
+    styles =
+      'bg-mywhite border-mywhite text-black hover:bg-blue-500 hover:border-blue-500 hover:text-white';
   }
   return (
     <div>
       <button
         type={isRedacted ? 'button' : 'submit'}
-        className={`flex justify-center items-center text-center rounded-[40px] pt-1 pb-1 pl-2 pr-2 ml-1 mr-1 border-[5.5px] min-w-[73.55px] text-[15px] h-[40px] select-none
+        className={`flex justify-center items-center text-center rounded-[40px] pt-1 pb-1 pl-2 pr-2 ml-1 mr-1 border-[5.5px] min-w-[73.55px] max-w-[73.55px] text-[15px] h-[40px] select-none
         ${styles}`}>
-        Redact
+        {isRedacted ? 'Prompt' : 'Redact'}
       </button>
     </div>
   );

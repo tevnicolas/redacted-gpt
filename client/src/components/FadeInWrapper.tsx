@@ -1,35 +1,37 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 
-export function FadeInWrapper({ children }) {
+type FadeInWrapperProps = {
+  children: React.ReactNode;
+};
+
+export const FadeInWrapper = memo(({ children }: FadeInWrapperProps) => {
   // State to track whether to apply the animation
-  const [shouldAnimate, setShouldAnimate] = useState(true);
+  // const [shouldAnimate, setShouldAnimate] = useState(true);
+  const shouldAnimate = useRef<boolean>(true);
   // State to store the timeout ID
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const timeoutIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    // If there's an existing timeout, clear it
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
+    if (!shouldAnimate) return;
+    const id = setTimeout(() => {
+      shouldAnimate.current = false;
+    }, 500); // assume this is your animation duration
+    return () => clearTimeout(id);
+  }, [shouldAnimate]);
 
-    // Only apply the animation if shouldAnimate is true
-    if (shouldAnimate) {
-      // Reset shouldAnimate after the animation is complete
-      const id = setTimeout(() => {
-        setShouldAnimate(false);
-      }, 1000); // Animation duration
-
-      // Store the timeout ID so it can be cleared if the component re-renders within a second
-      setTimeoutId(id);
-    }
-
-    // Cleanup function to clear the timeout when the component unmounts or re-renders
+  useEffect(() => {
+    // Clear any existing timeout to ensure clean animation restart
+    clearTimeout(timeoutIdRef.current);
+    // Schedule to turn off the animation
+    timeoutIdRef.current = setTimeout(() => {
+      shouldAnimate.current = true; // This ensures we turn off the animation
+    }, 500); // Duration matches your CSS animation
+    // Cleanup function to clear the timeout if the component unmounts or the path changes again
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = undefined;
     };
-  }, [children, shouldAnimate, timeoutId]);
+  }, [children]); // React only to changes in currentPath
 
   return (
     <div
@@ -39,4 +41,28 @@ export function FadeInWrapper({ children }) {
       {children}
     </div>
   );
-}
+});
+
+// Effect to handle animation logic
+// useEffect(() => {
+//   if (!shouldAnimate) return;
+//   const id = setTimeout(() => {
+//     setShouldAnimate(false);
+//   }, 1000); // assume this is your animation duration
+//   return () => clearTimeout(id);
+// }, [shouldAnimate]);
+
+// // Effect to manage timing between animations
+// useEffect(() => {
+//   // Always clear any existing timeout, safe operation even if undefined
+//   clearTimeout(timeoutIdRef.current);
+//   // Set a new timeout to enable animation
+//   timeoutIdRef.current = setTimeout(() => {
+//     setShouldAnimate(true);
+//   }, 1000); // Sets a minimum delay of 1 second between animations
+//   // Cleanup function to clear the timeout when the component unmounts or re-renders
+//   return () => {
+//     clearTimeout(timeoutIdRef.current);
+//     timeoutIdRef.current = undefined;
+//   };
+// }, [children]);
