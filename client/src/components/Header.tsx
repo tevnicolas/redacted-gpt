@@ -1,9 +1,11 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { LogIn, Triangle } from './LogIn';
 import { LuMenuSquare } from 'react-icons/lu';
 import { useState } from 'react';
+import { FadeInWrapper } from './FadeInWrapper';
 
 export function Header() {
+  const location = useLocation();
   const [mobileMenuDropdown, setMobileMenuDropdown] = useState(false);
   const [loginDropdown, setLoginDropdown] = useState(false);
 
@@ -59,7 +61,9 @@ export function Header() {
           </div>
         </div>
       )}
-      <Outlet />
+      <FadeInWrapper key={location.pathname}>
+        <Outlet />
+      </FadeInWrapper>
     </>
   );
 }
@@ -73,8 +77,8 @@ function Page({ text }: PageProps) {
     <NavLink
       className={({ isActive }) =>
         'flex justify-center items-center rounded-[40px] w-[100px] h-10 m-[4px]' +
-        (isActive ? ' bg-myyellow' : ' bg-mywhite') +
-        ' hover:bg-myyellow'
+        (isActive ? ' bg-myyellow' : ' bg-mywhite hover:bg-myconcrete') +
+        ' transition-colors duration-300 ease-in-out'
       }
       to={
         text === 'Home'

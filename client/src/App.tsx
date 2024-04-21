@@ -2,7 +2,7 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { Header } from './components/Header';
-import { Prompt } from './pages/Prompt';
+import { Home } from './pages/Home';
 import { FilterSets } from './pages/FilterSets';
 import { About } from './pages/About';
 import { Support } from './pages/Support';
@@ -29,7 +29,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<Header />}>
-          <Route index element={<Prompt />} />
+          <Route index element={<Home />} />
           <Route path="filter-sets" element={<FilterSets />} />
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
