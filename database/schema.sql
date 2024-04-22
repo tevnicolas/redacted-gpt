@@ -17,15 +17,17 @@ CREATE TABLE "filterSets" (
   "filterSetId" serial PRIMARY KEY NOT NULL,
   "label" text NOT NULL,
   "userId" integer NOT NULL,
-  "name" boolean NOT NULL,
+  "person" boolean NOT NULL,
   "phoneNumber" boolean NOT NULL,
   "emailAddress" boolean NOT NULL,
   "dateTime" boolean NOT NULL,
   "location" boolean NOT NULL,
   "usSsn" boolean NOT NULL,
-  "usDriversLicense" boolean NOT NULL,
-  "cryptoWalletNumber" boolean NOT NULL,
+  "usDriverLicense" boolean NOT NULL,
+  "crypto" boolean NOT NULL,
   "usBankNumber" boolean NOT NULL,
+  "creditCard" boolean NOT NULL,
+  "ipAddress" boolean NOT NULL,
   "createdAt" timestamptz NOT NULL DEFAULT (now())
 );
 

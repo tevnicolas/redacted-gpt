@@ -4,15 +4,15 @@
 insert into "users"
     ("username", "passwordHash")
   values
-    ('Brian', 'Wilson');
+    ('brian@me.com', 'wilson');
 
 insert into "filterSets"
-    ("label", "userId", "name", "phoneNumber",
+    ("label", "userId", "person", "phoneNumber",
     "emailAddress", "dateTime", "location",
-    "usSsn", "usDriversLicense", "cryptoWalletNumber",
-    "usBankNumber")
+    "usSsn", "usDriverLicense", "crypto",
+    "usBankNumber", "creditCard", "ipAddress")
   values
     ('schedules1', 1, false, true,
     true, true, true,
     false, false, false,
-    false);
+    false, true, true);

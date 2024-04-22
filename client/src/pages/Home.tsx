@@ -1,10 +1,40 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+// import { FilterSet, UnsavedFilterSet } from '../lib/data';
 
 export function Home() {
   const [error, setError] = useState<unknown>();
   //displayText state
+  const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
+  const [currentSet, setCurrentSet] = useState('');
+  // const [redactedText, setRedactedText] = useState('');
+
+  async function handleRedact(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    try {
+      // const formData = new FormData(e.currentTarget);
+      // const userInputs = Object.fromEntries(formData);
+      const req = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: inputText, filterSet: currentSet }),
+      };
+      const res = await fetch('/api/presidio', req);
+      if (!res.ok) {
+        throw new Error(`fetch Error ${res.status}`);
+      }
+      const redacted = await res.json();
+      if (!redacted.presidio) throw new Error('Redaction Error!');
+      setInputText('');
+      console.log(redacted.presidio);
+      // setRedactedText(redacted.presidio);
+    } catch (error) {
+      setError(error);
+    }
+  }
+
+  async function handlePrompt() {}
 
   if (error) {
     return (
@@ -25,10 +55,21 @@ export function Home() {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         }
       />
-      <form className="flex justify-center items-center w-full m-[35px]">
-        <Prompt onError={setError} />
-        <SelectFilterSet isNone={setIsRedacted} />
-        <RedactPrompt isRedacted={isRedacted} />
+      <form
+        onSubmit={handleRedact}
+        className="flex justify-center items-center w-full m-[35px]">
+        <Prompt
+          onError={setError}
+          inputText={inputText}
+          setInputText={setInputText}
+        />
+        <SelectFilterSet
+          isNone={setIsRedacted}
+          currentSet={currentSet}
+          setCurrentSet={setCurrentSet}
+          // filterSets={}
+        />
+        <RedactPrompt onPrompt={handlePrompt} isRedacted={isRedacted} />
       </form>
     </>
   );
@@ -50,10 +91,11 @@ function Display({ displayText }: DisplayProps) {
 
 type PromptProps = {
   onError: (error: unknown) => void;
+  inputText: string;
+  setInputText: (e: string) => void;
 };
 
-function Prompt({ onError }: PromptProps) {
-  const [inputText, setInputText] = useState('');
+function Prompt({ onError, inputText, setInputText }: PromptProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxHeight = 200;
 
@@ -99,15 +141,22 @@ function Prompt({ onError }: PromptProps) {
 
 type SelectFilterSetProps = {
   isNone: (value: boolean) => void;
+  // filterSets: FilterSet[] | UnsavedFilterSet[];
+  // currentSet: FilterSet | UnsavedFilterSet;
+  currentSet: string;
+  setCurrentSet: (e: string) => void;
 };
 
-function SelectFilterSet({ isNone }: SelectFilterSetProps) {
+function SelectFilterSet({
+  isNone,
+  currentSet,
+  setCurrentSet,
+}: SelectFilterSetProps) {
   const navigate = useNavigate();
-  const [filterSet, setFilterSet] = useState('');
-  if (filterSet === 'Create') {
+  if (currentSet === 'Create') {
     navigate('/filter-sets');
   }
-  if (filterSet === 'None') {
+  if (currentSet === 'None') {
     isNone(true);
   } else {
     isNone(false);
@@ -115,15 +164,16 @@ function SelectFilterSet({ isNone }: SelectFilterSetProps) {
   return (
     <div>
       <select
-        name="filterSets"
-        value={filterSet}
-        onChange={(e) => setFilterSet(e.currentTarget.value)}
+        name="filterSet"
+        value={currentSet}
+        onChange={(e) => setCurrentSet(e.currentTarget.value)}
         className="flex items-center text-center text-mywhite rounded-[40px] p-1 ml-1 mr-1 border-[5.5px] border-black w-[98px] min-w-[98px] max-w-[98px] text-[15px] h-[40px] bg-black select-none">
         <option className="hidden" value="">
           Filter Set
         </option>
         <option value=""></option>
         <option value="None">None</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
         <option value="Create">+Create Filter Set</option>
       </select>
     </div>
@@ -132,9 +182,10 @@ function SelectFilterSet({ isNone }: SelectFilterSetProps) {
 
 type RedactPromptProps = {
   isRedacted: boolean;
+  onPrompt: () => void;
 };
 
-function RedactPrompt({ isRedacted }: RedactPromptProps) {
+function RedactPrompt({ isRedacted, onPrompt }: RedactPromptProps) {
   let styles = '';
   if (isRedacted) {
     styles =
@@ -147,6 +198,7 @@ function RedactPrompt({ isRedacted }: RedactPromptProps) {
     <div>
       <button
         type={isRedacted ? 'button' : 'submit'}
+        onClick={isRedacted ? onPrompt : undefined}
         className={`flex justify-center items-center text-center rounded-[40px] pt-1 pb-1 pl-2 pr-2 ml-1 mr-1 border-[5.5px] min-w-[73.55px] max-w-[73.55px] text-[15px] h-[40px] select-none
         ${styles}`}>
         {isRedacted ? 'Prompt' : 'Redact'}

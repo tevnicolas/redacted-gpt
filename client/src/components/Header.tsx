@@ -62,7 +62,9 @@ export function Header() {
           </div>
         </div>
       )}
-      <FadeInWrapper key={location.pathname}>
+      <FadeInWrapper
+        key={location.pathname}
+        className="flex flex-wrap justify-center w-[100%] mt-14 mb-14 z-0">
         <Outlet />
       </FadeInWrapper>
     </>

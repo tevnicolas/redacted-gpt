@@ -38,14 +38,19 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello, World!' });
 });
 
-app.get('/api/presidio', async (req, res, next) => {
+app.post('/api/presidio', async (req, res, next) => {
   try {
+    const { prompt, filterSet } = req.body;
+    if (!prompt) throw new ClientError(400, 'Prompt must be provided.');
+    if (prompt.length > 4095)
+      throw new ClientError(400, 'Prompt must be less than 4096 characters.');
+    if (!filterSet) throw new ClientError(400, 'Filter Set must be selected.');
     const { stdout } = await exec(
-      'python3 ./try.python "My phone number is 949-555-1212 and SSN is 222-55-2322" PHONE_NUMBER US_SSN'
+      `python3 ./try.python "${prompt}" ${filterSet}`
     );
-    res.json({ presidio: stdout });
-  } catch (err) {
-    next(err);
+    res.status(201).json({ presidio: stdout });
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -93,9 +98,9 @@ async function startAnalysisThread(prompt: string): Promise<string> {
       );
     }
     return threadId;
-  } catch (err) {
-    console.error('Error (analysis thread)', err);
-    throw err;
+  } catch (error) {
+    console.error('Error (analysis thread)', error);
+    throw error;
   }
 }
 
@@ -124,9 +129,9 @@ async function createAnalysisRun(threadId: string): Promise<string> {
     await waitForRunCompletion(threadId, runData.id);
 
     return runData.thread_id;
-  } catch (err) {
-    console.error('Error (analysis run): ', err);
-    throw err;
+  } catch (error) {
+    console.error('Error (analysis run): ', error);
+    throw error;
   }
 }
 
@@ -163,8 +168,11 @@ async function waitForRunCompletion(
       await new Promise((resolve) => setTimeout(resolve, delay));
       delay *= 2; // Double the delay for the next retry
       retries++;
-    } catch (err) {
-      console.error(`Error fetching run status (Attempt ${retries + 1}):`, err);
+    } catch (error) {
+      console.error(
+        `Error fetching run status (Attempt ${retries + 1}):`,
+        error
+      );
       await new Promise((resolve) => setTimeout(resolve, delay));
       delay *= 2; // Double the delay for the next retry
       retries++;
@@ -197,9 +205,9 @@ async function getAnalysisResponse(runThreadId: string): Promise<string> {
     const analysisResponse = messagesData.data[0].content[0].text.value;
 
     return analysisResponse;
-  } catch (err) {
-    console.error('Error (analysis response):', err);
-    throw err;
+  } catch (error) {
+    console.error('Error (analysis response):', error);
+    throw error;
   }
 }
 
@@ -213,9 +221,9 @@ app.post('/api/open-ai', async (req, res, next) => {
       '<br>'
     );
     res.status(200).json({ analysis });
-  } catch (err) {
-    console.error('Error in processing OpenAI API request:', err);
-    next(err);
+  } catch (error) {
+    console.error('Error in processing OpenAI API request:', error);
+    next(error);
   }
 });
 

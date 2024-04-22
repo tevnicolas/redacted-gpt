@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from './Button';
 import { useEffect, useState } from 'react';
+import { FadeInWrapper } from './FadeInWrapper';
 
 type LogInProps = {
   status: boolean;
@@ -29,7 +30,7 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
         </h2>
       </div>
       {loginDropdown && (
-        <div className="flex flex-wrap justify-end absolute top-[80px] w-[200px] right-[49px] [@media(width<=767px)]:right-[108px] [@media(width<=335px)]:left-[20px] z-10">
+        <FadeInWrapper className="flex flex-wrap justify-end absolute top-[80px] w-[200px] right-[49px] [@media(width<=767px)]:right-[108px] [@media(width<=335px)]:left-[20px] z-10">
           <Triangle />
           <div className="bg-mywhite rounded-[18px] w-full">
             <form className="m-[15px]">
@@ -44,7 +45,7 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
               <p>error</p>
             </form>
           </div>
-        </div>
+        </FadeInWrapper>
       )}
     </>
   );
