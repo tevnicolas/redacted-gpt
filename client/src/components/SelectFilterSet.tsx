@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 
 type SelectFilterSetProps = {
   setIsRedacted: (value: boolean) => void;
-  // filterSets: FilterSet[] | UnsavedFilterSet[];
-  // currentSet: FilterSet | UnsavedFilterSet;
+  // will implement... filterSets: FilterSet[] | UnsavedFilterSet[];
+  // will implement... currentSet: FilterSet | UnsavedFilterSet;
   currentSet: string;
   setCurrentSet: (e: string) => void;
 };
@@ -16,6 +16,7 @@ export function SelectFilterSet({
 }: SelectFilterSetProps) {
   const navigate = useNavigate();
 
+  /* This logic determines whether redaction should graduate to prompting, or whether to instead create a new filter set */
   useEffect(() => {
     switch (currentSet) {
       case 'create':
@@ -24,7 +25,7 @@ export function SelectFilterSet({
       case '':
         setIsRedacted(true);
         break;
-      case 'review': // isRedacted is already true in this case
+      case 'review': // isRedacted will already be true in this case
       case 'placeholder':
         break;
       default:
@@ -35,7 +36,6 @@ export function SelectFilterSet({
   return (
     <div className="mt-[15px]">
       <select
-        name="filterSet"
         value={currentSet}
         onChange={(e) => setCurrentSet(e.currentTarget.value)}
         className={`flex items-center text-center text-mywhite rounded-[40px] p-1 ml-1 mr-1 border-[5.5px] border-black w-[98px] min-w-[98px] max-w-[98px] text-[15px] h-[39px] bg-black select-none ${

@@ -6,19 +6,18 @@ import { Display } from '../components/Display';
 import { presidioRedaction } from '../lib/data';
 import { validate } from '../lib/data';
 import { ValidationError } from '../lib/errors';
-// import { FilterSet, UnsavedFilterSet } from '../lib/data';
 
 export function Home() {
   const [error, setError] = useState<unknown>();
-  //displayText state
+  //will implement: displayText state
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
   const [currentSet, setCurrentSet] = useState('initial');
-  // const [redactedText, setRedactedText] = useState('');
   const displayRef = useRef<HTMLDivElement>(null);
 
   function adjustDisplayHeight(textareaHeight: number) {
-    textareaHeight -= 39; //39 is initial height of textarea
+    // 39 is initial height of textarea, this could be better handled
+    textareaHeight -= 39;
     const display = displayRef.current;
     if (!display) throw new Error('Missing display!');
     display.style.height = '55vh';

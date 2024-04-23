@@ -1,5 +1,6 @@
 import { ValidationError } from './errors';
 
+//will use
 export type UnsavedFilterSet = {
   label: string;
   person: boolean;
@@ -14,11 +15,12 @@ export type UnsavedFilterSet = {
   creditCard: boolean;
   ipAddress: boolean;
 };
-
+//will use
 export type FilterSet = UnsavedFilterSet & {
   filterSetId: number;
 };
-
+/* Sends raw text and filter set applied request,
+    receives redacted text string response, or error  */
 export async function presidioRedaction(
   inputText: string,
   currentSet: string
@@ -37,6 +39,7 @@ export async function presidioRedaction(
   return redacted.presidio;
 }
 
+/* Basically my (<form/>less) controlled form validation with a few custom message combinations  */
 export function validate(inputText: string, currentSet?: string) {
   const textLengthVal = inputText.length < 4095;
   const textRequiredVal = inputText.length > 0;
@@ -48,8 +51,8 @@ export function validate(inputText: string, currentSet?: string) {
   if (!textRequiredVal && filterSelectVal) {
     throw new ValidationError('Prompt is required!');
   }
-  // important to test currentSet for undefined not falsy values, as
-  // empty string is valid here ~> intentionally no filter set
+  /* important to test currentSet for undefined, not falsy values, as
+   empty string is valid here ~> it means intentionally no filter set */
   if (currentSet === undefined) return;
 
   if (textLengthVal && textRequiredVal && !filterSelectVal) {
