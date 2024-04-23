@@ -39,6 +39,21 @@ export async function presidioRedaction(
   return redacted.presidio;
 }
 
+export async function promptChatGPT(inputText: string): Promise<string> {
+  const req = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: inputText }),
+  };
+  const res = await fetch('/api/open-ai', req);
+  if (!res.ok) {
+    throw new Error(`fetch Error ${res.status}`);
+  }
+  const aiMessage = await res.json();
+  if (!aiMessage.analysis) throw new Error('Analysis Error!');
+  return aiMessage.analysis;
+}
+
 /* Basically my (<form/>less) controlled form validation with a few custom message combinations  */
 export function validate(inputText: string, currentSet?: string) {
   const textLengthVal = inputText.length < 4095;
@@ -58,12 +73,12 @@ export function validate(inputText: string, currentSet?: string) {
   if (textLengthVal && textRequiredVal && !filterSelectVal) {
     throw new ValidationError('Filter Set selection, or "None" is required!');
   }
-  if (!textLengthVal && !filterSelectVal) {
+  if (!textRequiredVal && !filterSelectVal) {
     throw new ValidationError(
-      'Write a little something, then select a Filter Set!'
+      'Write a little something ——then select a Filter Set!'
     );
   }
-  if (!textRequiredVal && !filterSelectVal) {
+  if (!textLengthVal && !filterSelectVal) {
     throw new ValidationError(
       "Woah there! Must be less than 4096 characters + Don't forget to select a Filter Set"
     );

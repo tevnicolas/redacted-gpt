@@ -1,24 +1,35 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { SelectFilterSet } from '../components/SelectFilterSet';
 import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
-import { presidioRedaction } from '../lib/data';
+import { presidioRedaction, promptChatGPT } from '../lib/data';
 import { validate } from '../lib/data';
 import { ValidationError } from '../lib/errors';
 
 export function Home() {
   const [error, setError] = useState<unknown>();
-  //will implement: displayText state
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
   const [currentSet, setCurrentSet] = useState('initial');
-  const displayRef = useRef<HTMLDivElement>(null);
+  const lastSetRef = useRef<string>('initial');
+  const [displayText, setDisplayText] = useState(
+    'Hello! Welcome to RedactedGPT.'
+  );
+  const displayBoxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error instanceof ValidationError) {
+      setError(undefined);
+    }
+    // Disabling dependency check because this effect should clear error only if input or select is made, not if there is an error
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputText, currentSet]);
 
   function adjustDisplayHeight(textareaHeight: number) {
     // 39 is initial height of textarea, this could be better handled
     textareaHeight -= 39;
-    const display = displayRef.current;
+    const display = displayBoxRef.current;
     if (!display) throw new Error('Missing display!');
     display.style.height = '55vh';
     display.style.height = String(display.offsetHeight - textareaHeight) + 'px';
@@ -29,6 +40,7 @@ export function Home() {
       validate(inputText, currentSet);
       const redactedText = await presidioRedaction(inputText, currentSet);
       setIsRedacted(true);
+      lastSetRef.current = currentSet;
       setCurrentSet('review');
       setInputText(redactedText);
     } catch (error) {
@@ -36,16 +48,22 @@ export function Home() {
     }
   }
 
-  async function handlePrompt() {}
+  async function handlePrompt() {
+    try {
+      validate(inputText);
+      const aiAnalysisText = await promptChatGPT(inputText);
+      setIsRedacted(false);
+      setCurrentSet(lastSetRef.current);
+      setDisplayText(aiAnalysisText);
+    } catch (error) {
+      setError(error);
+    }
+  }
 
   return (
     <>
-      <div className="h-[50vh]" ref={displayRef}>
-        <Display
-          displayText={
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-          }
-        />
+      <div className="h-[50vh]" ref={displayBoxRef}>
+        <Display displayText={displayText} />
       </div>
       <div className="flex flex-wrap justify-center items-end w-full m-[20px] max-h-[200px]">
         <WriteBox
