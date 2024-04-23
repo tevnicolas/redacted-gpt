@@ -48,7 +48,8 @@ app.post('/api/presidio', async (req, res, next) => {
     const { stdout } = await exec(
       `python3 ./try.python "${prompt}" ${filterSet}`
     );
-    res.status(201).json({ presidio: stdout });
+    // regex removes tailing '\n'
+    res.status(201).json({ presidio: stdout.replace(/\n$/, '') });
   } catch (error) {
     next(error);
   }

@@ -10,12 +10,12 @@ export function Home() {
   //displayText state
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
-  const [currentSet, setCurrentSet] = useState('');
+  const [currentSet, setCurrentSet] = useState('initial');
   // const [redactedText, setRedactedText] = useState('');
   const displayRef = useRef<HTMLDivElement>(null);
 
   function adjustDisplayHeight(textareaHeight: number) {
-    textareaHeight -= 39; //0 additional height
+    textareaHeight -= 39; //39 is initial height of textarea
     const display = displayRef.current;
     if (!display) throw new Error('Missing display!');
     display.style.height = '55vh';
@@ -35,9 +35,9 @@ export function Home() {
       }
       const redacted = await res.json();
       if (!redacted.presidio) throw new Error('Redaction Error!');
-      setInputText('');
-      console.log(redacted.presidio);
-      // setRedactedText(redacted.presidio);
+      setIsRedacted(true);
+      setCurrentSet('review');
+      setInputText(redacted.presidio);
     } catch (error) {
       setError(error);
     }
@@ -75,7 +75,7 @@ export function Home() {
         />
         <div className="flex flex-wrap justify-center">
           <SelectFilterSet
-            isNone={setIsRedacted}
+            setIsRedacted={setIsRedacted}
             currentSet={currentSet}
             setCurrentSet={setCurrentSet}
             // filterSets={}
