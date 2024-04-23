@@ -217,10 +217,7 @@ app.post('/api/open-ai', async (req, res, next) => {
     const { prompt } = req.body;
     const threadId = await startAnalysisThread(prompt);
     const runThreadId = await createAnalysisRun(threadId);
-    const analysis = (await getAnalysisResponse(runThreadId)).replace(
-      /\n/g,
-      '<br>'
-    );
+    const analysis = await getAnalysisResponse(runThreadId);
     res.status(200).json({ analysis });
   } catch (error) {
     console.error('Error in processing OpenAI API request:', error);

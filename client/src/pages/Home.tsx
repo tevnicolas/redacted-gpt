@@ -4,7 +4,7 @@ import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
 import { presidioRedaction, promptChatGPT } from '../lib/data';
-import { validate } from '../lib/data';
+import { validateSubmission } from '../lib/data';
 import { ValidationError } from '../lib/errors';
 
 export function Home() {
@@ -17,12 +17,13 @@ export function Home() {
     'Hello! Welcome to RedactedGPT.'
   );
   const displayBoxRef = useRef<HTMLDivElement>(null);
+  // const [isloading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (error instanceof ValidationError) {
       setError(undefined);
     }
-    // Disabling dependency check because this effect should clear error only if input or select is made, not if there is an error
+    // Disabling dependency check because this effect should clear Val error only if input or select is made, not if there is an error of any kind
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, currentSet]);
 
@@ -37,7 +38,7 @@ export function Home() {
 
   async function handleRedact() {
     try {
-      validate(inputText, currentSet);
+      validateSubmission(inputText, currentSet);
       const redactedText = await presidioRedaction(inputText, currentSet);
       setIsRedacted(true);
       lastSetRef.current = currentSet;
@@ -50,10 +51,17 @@ export function Home() {
 
   async function handlePrompt() {
     try {
-      validate(inputText);
+      validateSubmission(inputText);
       const aiAnalysisText = await promptChatGPT(inputText);
-      setIsRedacted(false);
-      setCurrentSet(lastSetRef.current);
+      // when user did not redact, select will still revert appropriately
+      if (currentSet !== 'review') {
+        lastSetRef.current = currentSet;
+      }
+      //If any filter set except 'None' was last set, show redact option again
+      if (lastSetRef.current !== 'none') {
+        setIsRedacted(false);
+      }
+      setCurrentSet(lastSetRef.current); // revert
       setDisplayText(aiAnalysisText);
     } catch (error) {
       setError(error);

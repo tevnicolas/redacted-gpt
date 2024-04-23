@@ -55,7 +55,7 @@ export async function promptChatGPT(inputText: string): Promise<string> {
 }
 
 /* Basically my (<form/>less) controlled form validation with a few custom message combinations  */
-export function validate(inputText: string, currentSet?: string) {
+export function validateSubmission(inputText: string, currentSet?: string) {
   const textLengthVal = inputText.length < 4095;
   const textRequiredVal = inputText.length > 0;
   const filterSelectVal = currentSet !== 'initial';
