@@ -9,6 +9,7 @@ export function Header() {
   const [mobileMenuDropdown, setMobileMenuDropdown] = useState(false);
   const [loginDropdown, setLoginDropdown] = useState(false);
 
+  /* Triggers Log in dropdown, so user can log in. Also accounts for the other possible open menu. */
   const handleLoginClick = useCallback(() => {
     setLoginDropdown((prev) => !prev);
     if (mobileMenuDropdown) {
@@ -16,6 +17,7 @@ export function Header() {
     }
   }, [mobileMenuDropdown]);
 
+  /* The main menu bar turns into mobile menu icon at mobile sizes, this function triggers that menu dropdown Also accounts for the other possible open menu. */
   const handleMobileClick = useCallback(() => {
     setMobileMenuDropdown((prev) => !prev);
     if (loginDropdown) {
@@ -74,7 +76,7 @@ export function Header() {
 type PageProps = {
   text: string;
 };
-
+/* These are the page buttons which populate the menu bar */
 function Page({ text }: PageProps) {
   return (
     <NavLink

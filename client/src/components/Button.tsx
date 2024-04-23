@@ -2,7 +2,7 @@ type ButtonProps = {
   type?: 'submit' | 'reset' | 'button' | undefined;
   text: string;
 };
-
+/* This button has not proved to be very reusable... */
 export function Button({ type, text }: ButtonProps) {
   return (
     <button
