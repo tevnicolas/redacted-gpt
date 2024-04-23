@@ -3,6 +3,9 @@ import { SelectFilterSet } from '../components/SelectFilterSet';
 import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
+import { presidioRedaction } from '../lib/data';
+import { validate } from '../lib/data';
+import { ValidationError } from '../lib/errors';
 // import { FilterSet, UnsavedFilterSet } from '../lib/data';
 
 export function Home() {
@@ -24,38 +27,17 @@ export function Home() {
 
   async function handleRedact() {
     try {
-      const req = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: inputText, filterSet: currentSet }),
-      };
-      const res = await fetch('/api/presidio', req);
-      if (!res.ok) {
-        throw new Error(`fetch Error ${res.status}`);
-      }
-      const redacted = await res.json();
-      if (!redacted.presidio) throw new Error('Redaction Error!');
+      validate(inputText, currentSet);
+      const redactedText = await presidioRedaction(inputText, currentSet);
       setIsRedacted(true);
       setCurrentSet('review');
-      setInputText(redacted.presidio);
+      setInputText(redactedText);
     } catch (error) {
       setError(error);
     }
   }
 
   async function handlePrompt() {}
-
-  if (error) {
-    return (
-      <>
-        <h2>
-          {error instanceof Error
-            ? String(error)
-            : `An unexpected error occurred: ${error}`}
-        </h2>
-      </>
-    );
-  }
 
   return (
     <>
@@ -87,6 +69,13 @@ export function Home() {
           />
         </div>
       </div>
+      {error && (
+        <h2 className="text-red-500 text-[12px]">
+          {error instanceof Error || error instanceof ValidationError
+            ? String(error)
+            : `An unexpected error occurred: ${error}`}
+        </h2>
+      )}
     </>
   );
 }

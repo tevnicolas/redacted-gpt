@@ -42,7 +42,7 @@ app.post('/api/presidio', async (req, res, next) => {
   try {
     const { prompt, filterSet } = req.body;
     if (!prompt) throw new ClientError(400, 'Prompt must be provided.');
-    if (prompt.length > 4095)
+    if (prompt.length > 4094)
       throw new ClientError(400, 'Prompt must be less than 4096 characters.');
     if (!filterSet) throw new ClientError(400, 'Filter Set must be selected.');
     const { stdout } = await exec(
