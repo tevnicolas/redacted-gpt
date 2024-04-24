@@ -3,27 +3,36 @@ import { SelectFilterSet } from '../components/SelectFilterSet';
 import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
-import { presidioRedaction, promptChatGPT } from '../lib/data';
-import { validateSubmission } from '../lib/data';
-import { ValidationError } from '../lib/errors';
+import { presidioRedaction, promptChatGPT } from '../lib/apiData';
+import { validateSubmission } from '../lib/validation';
+import { ValidationError } from '../lib/validation';
+import { Message } from '../lib/messageData';
 
 export function Home() {
   const [error, setError] = useState<unknown>();
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
   const [currentSet, setCurrentSet] = useState('initial');
+
   const lastSetRef = useRef<string>('initial');
-  const [displayText, setDisplayText] = useState(
-    'Hello! Welcome to RedactedGPT.'
-  );
   const displayBoxRef = useRef<HTMLDivElement>(null);
-  // const [isloading, setIsLoading] = useState(false);
+
+  //messages retrieves from session storage on mount
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const storedMessages = sessionStorage.getItem('chatMessages');
+    return storedMessages ? JSON.parse(storedMessages) : [];
+  });
+
+  //if messages changes, session storage is updated
+  useEffect(() => {
+    sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     if (error instanceof ValidationError) {
       setError(undefined);
     }
-    // Disabling dependency check because this effect should clear Val error only if input or select is made, not if there is an error of any kind
+    // Disabling dependency check because this effect should clear Val error only if input or select is updated, not if there is an error
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, currentSet]);
 
@@ -52,17 +61,33 @@ export function Home() {
   async function handlePrompt() {
     try {
       validateSubmission(inputText);
+      // Generates new id by last message's id, ++, If no messages-> id is 1
+
+      const newUserMessage: Message = {
+        id: messages.length ? messages[messages.length - 1].id + 1 : 1,
+        text: inputText,
+        sender: 'user',
+      };
+      setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+
       const aiAnalysisText = await promptChatGPT(inputText);
       // when user did not redact, select will still revert appropriately
       if (currentSet !== 'review') {
         lastSetRef.current = currentSet;
       }
-      //If any filter set except 'None' was last set, show redact option again
+      // If any filter set except 'None' was last set, show redact option again
       if (lastSetRef.current !== 'none') {
         setIsRedacted(false);
       }
       setCurrentSet(lastSetRef.current); // revert
-      setDisplayText(aiAnalysisText);
+
+      const newGptMessage: Message = {
+        id: newUserMessage.id++,
+        text: aiAnalysisText,
+        sender: 'redactedGpt',
+      };
+
+      setMessages((prevMessages) => [...prevMessages, newGptMessage]);
     } catch (error) {
       setError(error);
     }
@@ -71,7 +96,7 @@ export function Home() {
   return (
     <>
       <div className="h-[50vh]" ref={displayBoxRef}>
-        <Display displayText={displayText} />
+        <Display mailbox={messages} />
       </div>
       <div className="flex flex-wrap justify-center items-end w-full m-[20px] max-h-[200px]">
         <WriteBox
