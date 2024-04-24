@@ -12,42 +12,47 @@ export function Home() {
   const [error, setError] = useState<unknown>();
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
+  // 'Set' is always referring to Filter Set selection value
   const [currentSet, setCurrentSet] = useState('initial');
+  const lastSetRef = useRef<string>('initial'); // using this ref like state
+  const displayContainerRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const lastSetRef = useRef<string>('initial');
-  const displayBoxRef = useRef<HTMLDivElement>(null);
-
-  //messages retrieves from session storage on mount
+  // messages retrieves from session storage on mount
   const [messages, setMessages] = useState<Message[]>(() => {
     const storedMessages = sessionStorage.getItem('chatMessages');
     return storedMessages ? JSON.parse(storedMessages) : [];
   });
 
-  //if messages changes, session storage is updated
+  // If messages changes, session storage is updated
   useEffect(() => {
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
 
+  // This effect clears Val error only if input or select is updated
   useEffect(() => {
     if (error instanceof ValidationError) {
       setError(undefined);
     }
-    // Disabling dependency check because this effect should clear Val error only if input or select is updated, not if there is an error
+    // Disabling, as the reset is not dependent on error itself, just user input
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, currentSet]);
 
-  function adjustDisplayHeight(textareaHeight: number) {
-    // 39 is initial height of textarea, this could be better handled
-    textareaHeight -= 39;
-    const display = displayBoxRef.current;
+  function adjustDisplayHeight(
+    initialWriteBoxHeight: number,
+    writeBoxHeight: number // it grows
+  ) {
+    writeBoxHeight -= initialWriteBoxHeight;
+    const display = displayContainerRef.current;
     if (!display) throw new Error('Missing display!');
     display.style.height = '55vh';
-    display.style.height = String(display.offsetHeight - textareaHeight) + 'px';
+    display.style.height = String(display.offsetHeight - writeBoxHeight) + 'px';
   }
 
   async function handleRedact() {
     try {
       validateSubmission(inputText, currentSet);
+      setIsLoading(true);
       const redactedText = await presidioRedaction(inputText, currentSet);
       setIsRedacted(true);
       lastSetRef.current = currentSet;
@@ -55,14 +60,16 @@ export function Home() {
       setInputText(redactedText);
     } catch (error) {
       setError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handlePrompt() {
     try {
       validateSubmission(inputText);
+      setIsLoading(true);
       // Generates new id by last message's id, ++, If no messages-> id is 1
-
       const newUserMessage: Message = {
         id: messages.length ? messages[messages.length - 1].id + 1 : 1,
         text: inputText,
@@ -75,7 +82,7 @@ export function Home() {
       if (currentSet !== 'review') {
         lastSetRef.current = currentSet;
       }
-      // If any filter set except 'None' was last set, show redact option again
+      // If any filter set except 'none' was last set, show redact option again
       if (lastSetRef.current !== 'none') {
         setIsRedacted(false);
       }
@@ -84,25 +91,27 @@ export function Home() {
       const newGptMessage: Message = {
         id: newUserMessage.id++,
         text: aiAnalysisText,
-        sender: 'redactedGpt',
+        sender: 'ai',
       };
 
       setMessages((prevMessages) => [...prevMessages, newGptMessage]);
     } catch (error) {
       setError(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
     <>
-      <div className="h-[50vh]" ref={displayBoxRef}>
-        <Display mailbox={messages} />
+      <div className="h-[50vh]" ref={displayContainerRef}>
+        <Display isLoading={isLoading} mailbox={messages} />
       </div>
       <div className="flex flex-wrap justify-center items-end w-full m-[20px] max-h-[200px]">
         <WriteBox
-          onError={setError}
+          setError={setError}
           inputText={inputText}
-          setInputText={setInputText}
+          onChange={setInputText}
           adjustDisplayHeight={adjustDisplayHeight}
         />
         <div className="flex flex-wrap justify-center">

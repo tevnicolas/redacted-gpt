@@ -12,18 +12,14 @@ export function Header() {
   /* Triggers Log in dropdown, so user can log in. Also accounts for the other possible open menu. */
   const handleLoginClick = useCallback(() => {
     setLoginDropdown((prev) => !prev);
-    if (mobileMenuDropdown) {
-      setMobileMenuDropdown(false);
-    }
-  }, [mobileMenuDropdown]);
+    setMobileMenuDropdown(false);
+  }, []);
 
   /* The main menu bar turns into mobile menu icon at mobile sizes, this function triggers that menu dropdown Also accounts for the other possible open menu. */
   const handleMobileClick = useCallback(() => {
     setMobileMenuDropdown((prev) => !prev);
-    if (loginDropdown) {
-      setLoginDropdown(false);
-    }
-  }, [loginDropdown]);
+    setLoginDropdown(false);
+  }, []);
 
   return (
     <>

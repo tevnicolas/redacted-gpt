@@ -1,5 +1,5 @@
 export type Message = {
   id: number;
   text: string;
-  sender: 'user' | 'redactedGpt' | 'loading';
+  sender: 'user' | 'ai' | 'confirmation';
 };
