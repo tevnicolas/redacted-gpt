@@ -82,7 +82,7 @@ function Text({ sender, text }: TextProps) {
             : 'bg-myconcrete'
         }`}
       />
-      <div>
+      <div className="w-full">
         <span className="inline font-bold">
           {sender === 'user'
             ? 'You'
@@ -94,8 +94,8 @@ function Text({ sender, text }: TextProps) {
         <span
           className={
             text === 'Loading'
-              ? "animate-ellipsis after:content-[''] after:inline after:animate-ellipsis"
-              : ''
+              ? "break-all animate-ellipsis after:content-[''] after:inline after:animate-ellipsis"
+              : 'break-all'
           }>
           {textWithLineBreaks}
         </span>
