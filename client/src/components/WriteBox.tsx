@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 type WriteBoxProps = {
   setError: (error: unknown) => void;
@@ -19,7 +19,6 @@ export function WriteBox({
 }: WriteBoxProps) {
   const maxHeight = 200;
   const initialHeight = 39;
-  const [height, setHeight] = useState(initialHeight);
   const defaultScrollHeight = 61;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -43,8 +42,9 @@ export function WriteBox({
         textarea.style.height = initialHeight + 'px';
       }
     }
-    setHeight(textarea.offsetHeight);
-  }, [inputText]);
+    //adjusts display accordingly
+    adjustDisplayHeight(initialHeight, textarea.offsetHeight);
+  }, [inputText, adjustDisplayHeight]);
 
   useEffect(() => {
     try {
@@ -53,14 +53,6 @@ export function WriteBox({
       setError(error);
     }
   }, [inputText, adjustWriteBoxHeight, setError]);
-
-  useEffect(() => {
-    try {
-      adjustDisplayHeight(initialHeight, height); //arguments refer to WriteBox
-    } catch (error) {
-      setError(error);
-    }
-  }, [height, adjustDisplayHeight, setError]);
 
   return (
     <div className="mt-[15px]">

@@ -8,7 +8,7 @@ type DisplayProps = {
 };
 /** Display shows user prompted (post-redaction, validated) messages and AI response messages, as well as temporary loading messages and confirmations; It will show the entirety of a single session's conversation */
 export function Display({ mailbox, isLoading, isRedacted }: DisplayProps) {
-  const displayInnerRef = useRef<HTMLDivElement>(null);
+  const displayInnerRef = useRef<HTMLUListElement>(null);
   // const displayOuterRef = useRef<HTMLDivElement>(null);
   // Auto scrolls to bottom of the thread with every new message or if display changes height
   useEffect(() => {
@@ -16,14 +16,10 @@ export function Display({ mailbox, isLoading, isRedacted }: DisplayProps) {
     displayInnerRef.current.scrollTop = displayInnerRef.current.scrollHeight;
   }, [mailbox]);
 
-  // if (!displayOuterRef.current) console.log('oops');
-  // console.log(mailbox[0].key);
   return (
     <div className="flex w-[70vw] max-w-[800px] h-[inherit] bg-mygrey rounded-[20px]">
-      <div
-        className="m-10 pr-[20px] text-left overflow-y-scroll w-full"
-        ref={displayInnerRef}>
-        <ul>
+      <div className="flex items-end m-10 pr-[20px] text-left w-full overflow-y-scroll">
+        <ul className="max-h-[438px] overflow-y-scroll" ref={displayInnerRef}>
           {mailbox.map((message, index) => (
             <ListItem
               key={message.id}

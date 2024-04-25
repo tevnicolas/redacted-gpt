@@ -32,7 +32,7 @@ export function Home() {
     // If messages changes, session storage is updated
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
     // Resets inputText if security wasn't redacting, focuses on WriteBox
-    if (messages[messages.length - 1].sender !== 'security') {
+    if (messages[messages.length - 1]?.sender !== 'security') {
       setInputText('');
     }
   }, [messages]);
