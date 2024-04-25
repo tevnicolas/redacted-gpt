@@ -141,7 +141,6 @@ export function Home() {
             setIsRedacted={setIsRedacted}
             currentSet={currentSet}
             setCurrentSet={setCurrentSet}
-            // filterSets={}
           />
           <RedactOrPrompt
             onRedact={handleRedact}
