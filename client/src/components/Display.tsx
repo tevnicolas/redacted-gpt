@@ -14,12 +14,12 @@ export function Display({ mailbox, isLoading, isRedacted }: DisplayProps) {
   useEffect(() => {
     if (!displayInnerRef.current) return;
     displayInnerRef.current.scrollTop = displayInnerRef.current.scrollHeight;
-  }, [mailbox]);
+  }, [isLoading]);
 
   return (
     <div className="flex w-[70vw] max-w-[800px] h-[inherit] bg-mygrey rounded-[20px]">
       <div className="flex items-end m-10 pr-[20px] text-left w-full overflow-y-scroll">
-        <ul className="max-h-[438px] overflow-y-scroll" ref={displayInnerRef}>
+        <ul className="h-[438px] overflow-y-scroll" ref={displayInnerRef}>
           {mailbox.map((message, index) => (
             <ListItem
               key={message.id}
