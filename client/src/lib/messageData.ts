@@ -1,5 +1,5 @@
 export type Message = {
   id: number;
   text: string;
-  sender: 'user' | 'ai' | 'confirmation';
+  sender: 'user' | 'ai' | 'security';
 };

@@ -1,5 +1,4 @@
-/* To distinguish between client side validation and other errors. Basically starting at the toString() I'm insisting no prepended error ('Error: ' or 'ValidationError: ') because I don't think my simple form style validation needs an error warning */
-
+/** To distinguish between client side validation and other errors. Basically starting at the toString() I'm insisting no prepended error ('Error: ' or 'ValidationError: ') because I don't think my simple form style validation needs an error warning */
 export class ValidationError extends Error {
   isValidationError: boolean;
 
@@ -14,7 +13,7 @@ export class ValidationError extends Error {
   }
 }
 
-/* Basically my (<form/>less) controlled form validation with a few custom message combinations  */
+/**  Basically my (<form/>less) controlled form validation with a few custom message combinations  */
 export function validateSubmission(inputText: string, currentSet?: string) {
   const textLengthVal = inputText.length < 4095;
   const textRequiredVal = inputText.length > 0;
@@ -57,6 +56,12 @@ export class ReqInProgressError extends Error {
   }
 }
 
-// function isReqInProgress(isLoading: boolean, type: string) {
-//   if (isLoading)
-// }
+export function reqInProgressCheck(isLoading: boolean, handleFunction: string) {
+  if (!isLoading) return;
+  const actions = {
+    redact: 'Redacting',
+    prompt: 'Generating a response',
+  };
+  const action = actions[handleFunction] || 'Processing'; // Default action
+  throw new ReqInProgressError(`Woah there! ${action}, sit tight.`);
+}

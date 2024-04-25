@@ -4,8 +4,12 @@ import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
 import { presidioRedaction, promptChatGPT } from '../lib/apiData';
-import { ReqInProgressError, validateSubmission } from '../lib/validation';
-import { ValidationError } from '../lib/validation';
+import {
+  ReqInProgressError,
+  validateSubmission,
+  ValidationError,
+  reqInProgressCheck,
+} from '../lib/requestValidationErrors';
 import { Message } from '../lib/messageData';
 
 export function Home() {
@@ -27,8 +31,10 @@ export function Home() {
   useEffect(() => {
     // If messages changes, session storage is updated
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
-    // also clears Req error and resets text, focuses on WriteBox
-    setInputText('');
+    // Resets inputText if security wasn't redacting, focuses on WriteBox
+    if (messages[messages.length - 1].sender !== 'security') {
+      setInputText('');
+    }
   }, [messages]);
 
   // Clears ReqInProgressError only if loading completes
@@ -58,10 +64,7 @@ export function Home() {
 
   async function handleRedact() {
     try {
-      if (isLoading)
-        throw new ReqInProgressError(
-          'Woah there! Redacting in progress, sit tight.'
-        );
+      reqInProgressCheck(isLoading, 'redact');
       validateSubmission(inputText, currentSet);
       setIsLoading(true);
       const redactedText = await presidioRedaction(inputText, currentSet);
@@ -69,6 +72,13 @@ export function Home() {
       lastSetRef.current = currentSet;
       setCurrentSet('review');
       setInputText(redactedText);
+      const newSecurityMessage: Message = {
+        // Generates new id by last message's id + 1, If no messages-> id is 1
+        id: messages.length ? messages[messages.length - 1].id + 1 : 1,
+        text: 'Redaction complete.',
+        sender: 'security',
+      };
+      setMessages((prevMessages) => [...prevMessages, newSecurityMessage]);
       setIsLoading(false);
     } catch (error) {
       setError(error);
@@ -78,13 +88,10 @@ export function Home() {
 
   async function handlePrompt() {
     try {
-      if (isLoading)
-        throw new ReqInProgressError(
-          'Woah there! Generating a response, sit tight.'
-        );
+      reqInProgressCheck(isLoading, 'prompt');
       validateSubmission(inputText);
       setIsLoading(true);
-      // Generates new id by last message's id, ++, If no messages-> id is 1
+      // Generates new id by last message's id + 1, If no messages-> id is 1
       const newUserMessage: Message = {
         id: messages.length ? messages[messages.length - 1].id + 1 : 1,
         text: inputText,
@@ -94,21 +101,17 @@ export function Home() {
 
       const aiAnalysisRes = await promptChatGPT(inputText);
       // when user did not redact, select will still revert appropriately
-      if (currentSet !== 'review') {
-        lastSetRef.current = currentSet;
-      }
+      if (currentSet !== 'review') lastSetRef.current = currentSet;
       // If any filter set except 'none' was last set, show redact option again
-      if (lastSetRef.current !== 'none') {
-        setIsRedacted(false);
-      }
-      setCurrentSet(lastSetRef.current); // revert
+      if (lastSetRef.current !== 'none') setIsRedacted(false);
+      // revert
+      setCurrentSet(lastSetRef.current);
 
       const newAiMessage: Message = {
         id: newUserMessage.id + 1,
         text: aiAnalysisRes,
         sender: 'ai',
       };
-
       setMessages((prevMessages) => [...prevMessages, newAiMessage]);
       setIsLoading(false);
     } catch (error) {
@@ -120,7 +123,11 @@ export function Home() {
   return (
     <>
       <div className="h-[50vh]" ref={displayContainerRef}>
-        <Display isLoading={isLoading} mailbox={messages} />
+        <Display
+          mailbox={messages}
+          isLoading={isLoading}
+          isRedacted={isRedacted}
+        />
       </div>
       <div className="flex flex-wrap justify-center items-end w-full m-[20px] max-h-[200px]">
         <WriteBox
