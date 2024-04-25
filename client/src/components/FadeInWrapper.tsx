@@ -1,18 +1,18 @@
-import React, { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, memo, ReactNode } from 'react';
 
 type FadeInWrapperProps = {
-  children: React.ReactNode;
   className: string;
+  children: ReactNode;
 };
-/* This component fades in things. Memoized so that it doesn't rerender when parent rerenders which causes the fade in to fail */
+
+/** This component fades in things. Memoized so that it doesn't rerender when parent rerenders which can cause the fade in to fail */
 export const FadeInWrapper = memo(
   ({ children, className }: FadeInWrapperProps) => {
-    //useRefs necessary as state contradicts fade in effect when Header rerenders
+    /* useRefs necessary here as state's rerenders contradict fade in effect when Header rerenders */
     const shouldAnimate = useRef<boolean>(true);
     const timeoutIdRef = useRef<ReturnType<typeof setTimeout>>();
 
-    /* These useEffects make my head hurt, all logic is out the window here but it sure does work. Do not combine the useEffects. Trust me, I've tried. */
-
+    /* These useEffects make my head hurt, all logic is out the window here but it sure does work. Combining the useEffects breaks it. */
     useEffect(() => {
       if (!shouldAnimate) return;
       const id = setTimeout(() => {
