@@ -14,20 +14,6 @@ export class ValidationError extends Error {
   }
 }
 
-export class ReqInProgressError extends Error {
-  isReqInProgressError: boolean;
-
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-    this.isReqInProgressError = true;
-  }
-  toString() {
-    // Only return message
-    return this.message;
-  }
-}
-
 /* Basically my (<form/>less) controlled form validation with a few custom message combinations  */
 export function validateSubmission(inputText: string, currentSet?: string) {
   const textLengthVal = inputText.length < 4095;
@@ -56,3 +42,21 @@ export function validateSubmission(inputText: string, currentSet?: string) {
     );
   }
 }
+
+export class ReqInProgressError extends Error {
+  isReqInProgressError: boolean;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+    this.isReqInProgressError = true;
+  }
+  toString() {
+    // Only return message
+    return this.message;
+  }
+}
+
+// function isReqInProgress(isLoading: boolean, type: string) {
+//   if (isLoading)
+// }
