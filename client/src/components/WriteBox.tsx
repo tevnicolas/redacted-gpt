@@ -27,15 +27,21 @@ export function WriteBox({
   const adjustWriteBoxHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) throw new Error('Unable to load prompter!');
-    const isContentLessThanDefault =
-      textarea.scrollHeight < defaultScrollHeight;
+
+    textarea.style.height = 'auto';
+    let isContentLessThanDefault = textarea.scrollHeight < defaultScrollHeight;
     if (!inputText || isContentLessThanDefault) {
-      // If there is no text and content is less than the default height, set a one line fixed height
+      // sets to initial height if no text or if text is deleted
       textarea.style.height = initialHeight + 'px';
     } else {
       // Else set the height to the smaller of the scrollHeight and maxHeight
       const currentScrollHeight = textarea.scrollHeight;
       textarea.style.height = `${Math.min(currentScrollHeight, maxHeight)}px`;
+      /* redefining var with same exp is necessary here because scrollHeight changes when you reset textarea.style.height in the code above */
+      isContentLessThanDefault = textarea.scrollHeight < defaultScrollHeight;
+      if (isContentLessThanDefault) {
+        textarea.style.height = initialHeight + 'px';
+      }
     }
     setHeight(textarea.offsetHeight);
   }, [inputText]);
@@ -50,7 +56,7 @@ export function WriteBox({
 
   useEffect(() => {
     try {
-      adjustDisplayHeight(initialHeight, height); //arguments refer to writeBox
+      adjustDisplayHeight(initialHeight, height); //arguments refer to WriteBox
     } catch (error) {
       setError(error);
     }

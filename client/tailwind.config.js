@@ -16,6 +16,12 @@ export default {
         Righteous: ['Righteous', 'Roboto Slab', 'sans-serif'],
       },
       keyframes: {
+        ellipsis: {
+          '0%': { content: '""' },
+          '33%': { content: '"."' },
+          '66%': { content: '".."' },
+          '100%': { content: '"..."' },
+        },
         fadeIn: {
           '0%': { opacity: 0 },
           '100%': { opacity: 1 },
@@ -23,6 +29,7 @@ export default {
       },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-out forwards',
+        ellipsis: 'ellipsis 1.5s infinite',
       },
     },
   },

@@ -4,7 +4,7 @@ import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
 import { presidioRedaction, promptChatGPT } from '../lib/apiData';
-import { validateSubmission } from '../lib/validation';
+import { ReqInProgressError, validateSubmission } from '../lib/validation';
 import { ValidationError } from '../lib/validation';
 import { Message } from '../lib/messageData';
 
@@ -24,19 +24,26 @@ export function Home() {
     return storedMessages ? JSON.parse(storedMessages) : [];
   });
 
-  // If messages changes, session storage is updated
   useEffect(() => {
+    // If messages changes, session storage is updated
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+    // also clears Req error and resets text, focuses on WriteBox
+    setInputText('');
   }, [messages]);
 
-  // This effect clears Val error only if input or select is updated
+  // Clears ReqInProgressError only if loading completes
   useEffect(() => {
-    if (error instanceof ValidationError) {
-      setError(undefined);
-    }
+    if (error instanceof ReqInProgressError) setError(undefined);
+    // Disabling, as the reset is not dependent on error itself, just loading
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
+
+  // Clears ValidationError only if input or select is updated
+  useEffect(() => {
+    if (error instanceof ValidationError) setError(undefined);
     // Disabling, as the reset is not dependent on error itself, just user input
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, currentSet]);
+  }, [inputText, currentSet, messages]);
 
   function adjustDisplayHeight(
     initialWriteBoxHeight: number,
@@ -51,6 +58,10 @@ export function Home() {
 
   async function handleRedact() {
     try {
+      if (isLoading)
+        throw new ReqInProgressError(
+          'Woah there! Redacting in progress, sit tight.'
+        );
       validateSubmission(inputText, currentSet);
       setIsLoading(true);
       const redactedText = await presidioRedaction(inputText, currentSet);
@@ -58,15 +69,19 @@ export function Home() {
       lastSetRef.current = currentSet;
       setCurrentSet('review');
       setInputText(redactedText);
+      setIsLoading(false);
     } catch (error) {
       setError(error);
-    } finally {
-      setIsLoading(false);
+      if (!(error instanceof ReqInProgressError)) setIsLoading(false);
     }
   }
 
   async function handlePrompt() {
     try {
+      if (isLoading)
+        throw new ReqInProgressError(
+          'Woah there! Generating a response, sit tight.'
+        );
       validateSubmission(inputText);
       setIsLoading(true);
       // Generates new id by last message's id, ++, If no messages-> id is 1
@@ -77,7 +92,7 @@ export function Home() {
       };
       setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
-      const aiAnalysisText = await promptChatGPT(inputText);
+      const aiAnalysisRes = await promptChatGPT(inputText);
       // when user did not redact, select will still revert appropriately
       if (currentSet !== 'review') {
         lastSetRef.current = currentSet;
@@ -88,17 +103,17 @@ export function Home() {
       }
       setCurrentSet(lastSetRef.current); // revert
 
-      const newGptMessage: Message = {
-        id: newUserMessage.id++,
-        text: aiAnalysisText,
+      const newAiMessage: Message = {
+        id: newUserMessage.id + 1,
+        text: aiAnalysisRes,
         sender: 'ai',
       };
 
-      setMessages((prevMessages) => [...prevMessages, newGptMessage]);
+      setMessages((prevMessages) => [...prevMessages, newAiMessage]);
+      setIsLoading(false);
     } catch (error) {
       setError(error);
-    } finally {
-      setIsLoading(false);
+      if (!(error instanceof ReqInProgressError)) setIsLoading(false);
     }
   }
 
