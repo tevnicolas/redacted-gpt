@@ -2,26 +2,43 @@
 import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
+import argon2 from 'argon2';
+import jwt from 'jsonwebtoken';
 import { promisify } from 'node:util';
 import { exec as nodeExec } from 'node:child_process';
 import {
   ClientError,
   defaultMiddleware,
   errorMiddleware,
+  authMiddleware,
 } from './lib/index.js';
 import { nextTick } from 'node:process';
+import { FilterSet } from '../client/src/lib/data.js';
 
 const exec = promisify(nodeExec);
+
+type User = {
+  userId: number;
+  username: string;
+  passwordHash: string;
+};
+type Auth = {
+  username: string;
+  password: string;
+};
 
 const connectionString =
   process.env.DATABASE_URL ||
   `postgresql://${process.env.RDS_USERNAME}:${process.env.RDS_PASSWORD}@${process.env.RDS_HOSTNAME}:${process.env.RDS_PORT}/${process.env.RDS_DB_NAME}`;
 const db = new pg.Pool({
-  connectionString,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
 });
+
+const hashKey = process.env.TOKEN_SECRET;
+if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 
 const app = express();
 
@@ -34,9 +51,182 @@ app.use(express.static(reactStaticDir));
 app.use(express.static(uploadsStaticDir));
 app.use(express.json());
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
+app.post('/api/auth/sign-up', async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      throw new ClientError(400, 'username and password are required fields');
+    }
+    const passwordHash = await argon2.hash(password);
+    const sql = `
+      insert into "users" ("username", "passwordHash")
+      values ($1, $2)
+      returning "userId", "username", "createdAt";
+    `;
+    const params = [username, passwordHash];
+    const result = await db.query(sql, params);
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    next(err);
+  }
 });
+
+app.post('/api/auth/sign-in', async (req, res, next) => {
+  try {
+    const { username, password } = req.body as Partial<Auth>;
+    if (!username || !password) {
+      throw new ClientError(401, 'invalid login');
+    }
+    const sql = `
+      select "userId",
+            "passwordHash"
+        from "users"
+        where "username" = $1;
+    `;
+    const params = [username];
+    const result = await db.query(sql, params);
+    if (!result.rows[0]) throw new ClientError(401, 'invalid login');
+    const verify = await argon2.verify(result.rows[0].passwordHash, password);
+    if (!verify) throw new ClientError(401, 'invlalid login');
+    const payload = { username, userId: result.rows[0].userId };
+    const token = jwt.sign(payload, hashKey);
+    res.status(200).json({ user: payload, token });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// if (!req.user?.userId) {
+//   return res.status(403).send('User identification is required.');
+// }
+// or figure out some kind of error handling for this...maybe just next(error)
+
+app.get('/api/filterSets', authMiddleware, async (req, res, next) => {
+  try {
+    const sql = `
+      select *
+        from "filterSets"
+        where "userId" = $1;
+    `;
+    const result = await db.query<FilterSet>(sql, [req.user?.userId]);
+    const filterSets = result.rows;
+    res.status(200).json(filterSets);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/api/filterSets', authMiddleware, async (req, res, next) => {
+  try {
+    const filters = [
+      req.body.label,
+      req.body.person,
+      req.body.phoneNumber,
+      req.body.emailAddress,
+      req.body.dateTime,
+      req.body.location,
+      req.body.usSsn,
+      req.body.usDriverLicense,
+      req.body.crypto,
+      req.body.usBankNumber,
+      req.body.creditCard,
+      req.body.ipAddress,
+    ];
+    // if none are true
+    if (!filters.some((value) => value)) {
+      throw new ClientError(
+        400,
+        "Add at least one filter to save a filter set. If no filter is required, use 'None' before prompting on the Home page."
+      );
+    }
+    const params = [...filters, req.user?.userId];
+    const sql = `
+      insert into "filterSets"
+        ("label", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn",
+        "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress", "userId")
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      returning *;
+    `;
+    const result = await db.query<FilterSet>(sql, params);
+    const filterSet = result.rows[0];
+    res.status(201).json(filterSet);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.put(
+  '/api/filterSets/:filterSetId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const { filterSetId } = req.params;
+      const filters = [
+        req.body.label,
+        req.body.person,
+        req.body.phoneNumber,
+        req.body.emailAddress,
+        req.body.dateTime,
+        req.body.location,
+        req.body.usSsn,
+        req.body.usDriverLicense,
+        req.body.crypto,
+        req.body.usBankNumber,
+        req.body.creditCard,
+        req.body.ipAddress,
+      ];
+      // if none are true
+      if (!filters.some((value) => value)) {
+        throw new ClientError(
+          400,
+          "At least one filter must be applied to update the filter set. Add one, or delete / revert the set. If you don't require filters, use 'None' before prompting on the Home page."
+        );
+      }
+      const params = [...filters, filterSetId, req.user?.userId];
+      const sql = `
+        update "filterSets"
+        set "label" = $1, "person" = $2, "phoneNumber" = $3,
+            "emailAddress" = $4, "dateTime" = $5, "location" = $6,
+            "usSsn" = $7, "usDriverLicense" = $8, "crypto" = $9,
+            "usBankNumber" = $10, "creditCard" = $11, "ipAddress" = $12
+        where "filterSetId" = $13 AND "userId" = $14
+        returning *;
+      `;
+      const results = await db.query<FilterSet>(sql, params);
+      const updatedFilterSet = results.rows[0];
+      if (!updatedFilterSet) {
+        throw new ClientError(404, `Hmm... Could not find ${filterSetId}`);
+      }
+      res.status(200).json(updatedFilterSet);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+app.delete(
+  '/api/filterSets/:filterSetId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const { filterSetId } = req.params;
+      const params = [filterSetId, req.user?.userId];
+      const sql = `
+      delete from "filterSets"
+        where "filterSetId" = $1 and "userId" = $2
+        returning *;
+      `;
+      const results = await db.query<FilterSet>(sql, params);
+      const deleteFilterSet = results.rows[0];
+      if (!deleteFilterSet) {
+        throw new ClientError(404, `Hmm... Could not find ${filterSetId}`);
+      }
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 app.post('/api/presidio', async (req, res, next) => {
   try {

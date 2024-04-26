@@ -1,4 +1,4 @@
-export function Support() {
+export function SupportPage() {
   return (
     <div>
       <h1>Support</h1>

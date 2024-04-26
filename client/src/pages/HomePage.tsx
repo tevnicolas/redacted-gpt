@@ -3,16 +3,16 @@ import { SelectFilterSet } from '../components/SelectFilterSet';
 import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
-import { presidioRedaction, promptChatGPT } from '../lib/apiData';
+import { presidioRedaction, promptChatGPT } from '../lib/data';
 import {
   ReqInProgressError,
   validateSubmission,
   ValidationError,
   reqInProgressCheck,
 } from '../lib/requestValidationErrors';
-import { Message } from '../lib/messageData';
+import { Message } from '../lib/data';
 
-export function Home() {
+export function HomePage() {
   const [error, setError] = useState<unknown>();
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);

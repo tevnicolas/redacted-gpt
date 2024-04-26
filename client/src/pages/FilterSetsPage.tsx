@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Switch from 'react-switch';
 
-export function FilterSets() {
+export function FilterSetsPage() {
   const [checked, setChecked] = useState(false);
   function handleChange() {
     setChecked((prev) => !prev);

@@ -1,12 +1,13 @@
-// import { useEffect, useState } from 'react';
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { Header } from './components/Header';
-import { Home } from './pages/Home';
-import { FilterSets } from './pages/FilterSets';
-import { About } from './pages/About';
-import { Support } from './pages/Support';
-import { SignUp } from './pages/SignUp';
+import { HomePage } from './pages/HomePage';
+import { FilterSetsPage } from './pages/FilterSetsPage';
+import { AboutPage } from './pages/AboutPage';
+import { SupportPage } from './pages/SupportPage';
+import { SignUpPage } from './pages/SignUpPage';
+// import { createContext } from 'react';
+// import { FilterSet } from './lib/data';
 
 export default function App() {
   // state for filter sets (inside of context)
@@ -25,16 +26,49 @@ export default function App() {
   //   readServerData();
   // }, []);
 
+  // const filterSetData = createContext<FilterSet[]>([
+  //   {
+  //     filterSetId: 1,
+  //     label: 'first',
+  //     person: true,
+  //     phoneNumber: true,
+  //     emailAddress: true,
+  //     dateTime: true,
+  //     location: true,
+  //     usSsn: true,
+  //     usDriverLicense: true,
+  //     crypto: true,
+  //     usBankNumber: true,
+  //     creditCard: true,
+  //     ipAddress: true,
+  //   },
+  //   {
+  //     filterSetId: 2,
+  //     label: 'second',
+  //     person: false,
+  //     phoneNumber: true,
+  //     emailAddress: false,
+  //     dateTime: false,
+  //     location: false,
+  //     usSsn: false,
+  //     usDriverLicense: false,
+  //     crypto: false,
+  //     usBankNumber: false,
+  //     creditCard: false,
+  //     ipAddress: false,
+  //   },
+  // ]);
+
   return (
     <>
       <Routes>
         <Route path="/" element={<Header />}>
-          <Route index element={<Home />} />
-          <Route path="filter-sets" element={<FilterSets />} />
-          <Route path="about" element={<About />} />
-          <Route path="support" element={<Support />} />
+          <Route index element={<HomePage />} />
+          <Route path="filter-sets" element={<FilterSetsPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="support" element={<SupportPage />} />
         </Route>
-        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
       </Routes>
     </>
   );
