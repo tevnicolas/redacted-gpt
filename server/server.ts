@@ -14,6 +14,11 @@ import {
 } from './lib/index.js';
 import { nextTick } from 'node:process';
 import { FilterSet } from '../client/src/lib/data.js';
+import {
+  createAnalysisRun,
+  getAnalysisResponse,
+  startAnalysisThread,
+} from './lib/openai-service.js';
 
 const exec = promisify(nodeExec);
 
@@ -224,7 +229,10 @@ app.put(
       const results = await db.query<FilterSet>(sql, params);
       const updatedFilterSet = results.rows[0];
       if (!updatedFilterSet) {
-        throw new ClientError(404, `Hmm... Could not find ${filterSetId}`);
+        throw new ClientError(
+          404,
+          `Hmm... Something went wrong here. Filter Set changes could not be saved. ${filterSetId}`
+        );
       }
       res.status(200).json(updatedFilterSet);
     } catch (error) {
@@ -238,8 +246,9 @@ app.delete(
   authMiddleware,
   async (req, res, next) => {
     try {
+      const { userId } = req.user!; // <- auth Mw ensures req.user is defined
       const { filterSetId } = req.params;
-      const params = [filterSetId, req.user?.userId];
+      const params = [filterSetId, userId];
       const sql = `
       delete from "filterSets"
         where "filterSetId" = $1 and "userId" = $2
@@ -248,7 +257,10 @@ app.delete(
       const results = await db.query<FilterSet>(sql, params);
       const deleteFilterSet = results.rows[0];
       if (!deleteFilterSet) {
-        throw new ClientError(404, `Hmm... Could not find ${filterSetId}`);
+        throw new ClientError(
+          404,
+          `Hmm... Something went wrong here. Filter Set could not be deleted.`
+        );
       }
       res.sendStatus(204);
     } catch (error) {
@@ -274,163 +286,6 @@ app.post('/api/presidio', async (req, res, next) => {
   }
 });
 
-async function startAnalysisThread(prompt: string): Promise<string> {
-  try {
-    const threadResponse = await fetch('https://api.openai.com/v1/threads', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-        'OpenAI-Beta': 'assistants=v1',
-      },
-    });
-
-    if (!threadResponse.ok) {
-      throw new Error(
-        `HTTP error when creating a thread! status: ${threadResponse.status}`
-      );
-    }
-
-    const threadData = await threadResponse.json();
-    const threadId = threadData.id;
-
-    const data = {
-      role: 'user',
-      content: prompt,
-    };
-
-    const inputResponse = await fetch(
-      `https://api.openai.com/v1/threads/${threadId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-          'OpenAI-Beta': 'assistants=v1',
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!inputResponse.ok) {
-      throw new Error(
-        `HTTP error when adding input message! Status: ${inputResponse.status}`
-      );
-    }
-    return threadId;
-  } catch (error) {
-    console.error('Error (analysis thread)', error);
-    throw error;
-  }
-}
-
-async function createAnalysisRun(threadId: string): Promise<string> {
-  try {
-    const runResponse = await fetch(
-      `https://api.openai.com/v1/threads/${threadId}/runs`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-          'OpenAI-Beta': 'assistants=v2',
-        },
-        body: JSON.stringify({ assistant_id: 'asst_zugUooF8ONOkoEqoD2Hc0wWz' }),
-      }
-    );
-
-    if (!runResponse.ok) {
-      throw new Error(
-        `HTTP error in creating a run Status ${runResponse.status}`
-      );
-    }
-
-    const runData = await runResponse.json();
-    await waitForRunCompletion(threadId, runData.id);
-
-    return runData.thread_id;
-  } catch (error) {
-    console.error('Error (analysis run): ', error);
-    throw error;
-  }
-}
-
-async function waitForRunCompletion(
-  threadId: string,
-  runId: string
-): Promise<void> {
-  let retries = 0;
-  const maxRetries = 10;
-  let delay = 2000; // Initial delay in milliseconds
-
-  while (retries < maxRetries) {
-    try {
-      const runStatusResponse = await fetch(
-        `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-            'OpenAI-Beta': 'assistants=v1',
-          },
-        }
-      );
-
-      if (!runStatusResponse.ok) {
-        throw new Error(`HTTP error! Status: ${runStatusResponse.status}`);
-      }
-
-      const runStatusData = await runStatusResponse.json();
-      if (runStatusData.status === 'completed') {
-        return; // Exit the loop if the run is completed
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      delay *= 2; // Double the delay for the next retry
-      retries++;
-    } catch (error) {
-      console.error(
-        `Error fetching run status (Attempt ${retries + 1}):`,
-        error
-      );
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      delay *= 2; // Double the delay for the next retry
-      retries++;
-    }
-  }
-
-  throw new Error('Maximum retries reached waiting for run completion');
-}
-
-async function getAnalysisResponse(runThreadId: string): Promise<string> {
-  try {
-    const messagesResponse = await fetch(
-      `https://api.openai.com/v1/threads/${runThreadId}/messages`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-          'OpenAI-Beta': 'assistants=v1',
-        },
-      }
-    );
-
-    if (!messagesResponse.ok) {
-      throw new Error(
-        `HTTP error when fetching messages! Status: ${messagesResponse.status}`
-      );
-    }
-
-    const messagesData = await messagesResponse.json();
-    const analysisResponse = messagesData.data[0].content[0].text.value;
-
-    return analysisResponse;
-  } catch (error) {
-    console.error('Error (analysis response):', error);
-    throw error;
-  }
-}
-
 app.post('/api/open-ai', async (req, res, next) => {
   try {
     const { prompt } = req.body;
@@ -451,9 +306,7 @@ app.post('/api/open-ai', async (req, res, next) => {
  * get/post/put/etc. route handlers and just before errorMiddleware.
  */
 app.use(defaultMiddleware(reactStaticDir));
-
 app.use(errorMiddleware);
-
 app.listen(process.env.PORT, () => {
   process.stdout.write(`\n\napp listening on port ${process.env.PORT}\n\n`);
 });

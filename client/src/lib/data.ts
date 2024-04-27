@@ -1,4 +1,3 @@
-//will use
 export type UnsavedFilterSet = {
   label: string;
   person: boolean;
@@ -13,7 +12,7 @@ export type UnsavedFilterSet = {
   creditCard: boolean;
   ipAddress: boolean;
 };
-//will use
+
 export type FilterSet = UnsavedFilterSet & {
   filterSetId: number;
 };
@@ -24,8 +23,8 @@ export type Message = {
   sender: 'user' | 'ai' | 'security';
 };
 
-/* Sends raw text and filter set applied request,
-    receives redacted text string response, or error  */
+/** Sends raw text and filter set applied request,
+    receives redacted text string response, or error */
 export async function presidioRedaction(
   inputText: string,
   currentSet: string
