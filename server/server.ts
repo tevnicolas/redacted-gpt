@@ -55,7 +55,7 @@ app.post('/api/auth/sign-up', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      throw new ClientError(400, 'username and password are required fields');
+      throw new ClientError(400, 'Username and Password are required fields');
     }
     const passwordHash = await argon2.hash(password);
     const sql = `
@@ -66,8 +66,8 @@ app.post('/api/auth/sign-up', async (req, res, next) => {
     const params = [username, passwordHash];
     const result = await db.query(sql, params);
     res.status(201).json(result.rows[0]);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -75,7 +75,7 @@ app.post('/api/auth/sign-in', async (req, res, next) => {
   try {
     const { username, password } = req.body as Partial<Auth>;
     if (!username || !password) {
-      throw new ClientError(401, 'invalid login');
+      throw new ClientError(401, 'Invalid Login');
     }
     const sql = `
       select "userId",
@@ -85,21 +85,16 @@ app.post('/api/auth/sign-in', async (req, res, next) => {
     `;
     const params = [username];
     const result = await db.query(sql, params);
-    if (!result.rows[0]) throw new ClientError(401, 'invalid login');
+    if (!result.rows[0]) throw new ClientError(401, 'Invalid Login');
     const verify = await argon2.verify(result.rows[0].passwordHash, password);
-    if (!verify) throw new ClientError(401, 'invlalid login');
+    if (!verify) throw new ClientError(401, 'Invalid Login');
     const payload = { username, userId: result.rows[0].userId };
     const token = jwt.sign(payload, hashKey);
     res.status(200).json({ user: payload, token });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
-
-// if (!req.user?.userId) {
-//   return res.status(403).send('User identification is required.');
-// }
-// or figure out some kind of error handling for this...maybe just next(error)
 
 app.get('/api/filterSets', authMiddleware, async (req, res, next) => {
   try {
@@ -111,8 +106,8 @@ app.get('/api/filterSets', authMiddleware, async (req, res, next) => {
     const result = await db.query<FilterSet>(sql, [req.user?.userId]);
     const filterSets = result.rows;
     res.status(200).json(filterSets);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -132,14 +127,25 @@ app.post('/api/filterSets', authMiddleware, async (req, res, next) => {
       req.body.creditCard,
       req.body.ipAddress,
     ];
-    // if none are true
+    const { userId } = req.user!; // <- auth Mw ensures req.user is defined
+    // if any filters are undefined -> client side error, but not user error
+    if (filters.some((value) => value === undefined)) {
+      console.error(
+        `Error 412, At least one of the filters in app.post('/api/filterSets' req.body is undefined. Dev problem!`
+      );
+      throw new ClientError(
+        412,
+        'Apologies, something has gone horribly awry!'
+      );
+    }
+    // user error if at least one of the filters is not value true
     if (!filters.some((value) => value)) {
       throw new ClientError(
         400,
         "Add at least one filter to save a filter set. If no filter is required, use 'None' before prompting on the Home page."
       );
     }
-    const params = [...filters, req.user?.userId];
+    const params = [...filters, userId];
     const sql = `
       insert into "filterSets"
         ("label", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn",
@@ -150,8 +156,8 @@ app.post('/api/filterSets', authMiddleware, async (req, res, next) => {
     const result = await db.query<FilterSet>(sql, params);
     const filterSet = result.rows[0];
     res.status(201).json(filterSet);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -160,7 +166,6 @@ app.put(
   authMiddleware,
   async (req, res, next) => {
     try {
-      const { filterSetId } = req.params;
       const filters = [
         req.body.label,
         req.body.person,
@@ -175,14 +180,38 @@ app.put(
         req.body.creditCard,
         req.body.ipAddress,
       ];
-      // if none are true
+      const { filterSetId } = req.params;
+      const { userId } = req.user!; // <- auth Mw ensures req.user is defined
+
+      // if any filters are undefined -> client side error, never a user error
+      if (filters.some((value) => value === undefined)) {
+        console.error(
+          `Error 412, At least one of the filters in app.put('/api/filterSets/:filterSetId' req.body is undefined, which is a you (dev) problem!`
+        );
+        throw new ClientError(
+          412,
+          'Apologies, something has gone horribly awry!'
+        );
+      }
+      // if filterSetId is !(string(pos integer > 0) w/o leading 0s)
+      // -> client side error, never a user error
+      if (!/^[1-9]\d*$/.test(filterSetId)) {
+        console.error(
+          `Error 404, in the req.params of app.put('/api/filterSets/:filterSetId' filterSetId was not a string pos integer > 0, so possibly undefined or empty. Dev problem!`
+        );
+        throw new ClientError(
+          404,
+          'Apologies, something has gone horribly awry!'
+        );
+      }
+      // if at least one of the filters is not value true, -> user error
       if (!filters.some((value) => value)) {
         throw new ClientError(
           400,
           "At least one filter must be applied to update the filter set. Add one, or delete / revert the set. If you don't require filters, use 'None' before prompting on the Home page."
         );
       }
-      const params = [...filters, filterSetId, req.user?.userId];
+      const params = [...filters, filterSetId, userId];
       const sql = `
         update "filterSets"
         set "label" = $1, "person" = $2, "phoneNumber" = $3,
@@ -304,7 +333,7 @@ async function createAnalysisRun(threadId: string): Promise<string> {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-          'OpenAI-Beta': 'assistants=v1',
+          'OpenAI-Beta': 'assistants=v2',
         },
         body: JSON.stringify({ assistant_id: 'asst_zugUooF8ONOkoEqoD2Hc0wWz' }),
       }
