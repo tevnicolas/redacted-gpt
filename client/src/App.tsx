@@ -6,8 +6,6 @@ import { FilterSetsPage } from './pages/FilterSetsPage';
 import { AboutPage } from './pages/AboutPage';
 import { SupportPage } from './pages/SupportPage';
 import { SignUpPage } from './pages/SignUpPage';
-// import { createContext } from 'react';
-// import { FilterSet } from './lib/data';
 
 export default function App() {
   // state for filter sets (inside of context)
@@ -25,39 +23,6 @@ export default function App() {
 
   //   readServerData();
   // }, []);
-
-  // const filterSetData = createContext<FilterSet[]>([
-  //   {
-  //     filterSetId: 1,
-  //     label: 'first',
-  //     person: true,
-  //     phoneNumber: true,
-  //     emailAddress: true,
-  //     dateTime: true,
-  //     location: true,
-  //     usSsn: true,
-  //     usDriverLicense: true,
-  //     crypto: true,
-  //     usBankNumber: true,
-  //     creditCard: true,
-  //     ipAddress: true,
-  //   },
-  //   {
-  //     filterSetId: 2,
-  //     label: 'second',
-  //     person: false,
-  //     phoneNumber: true,
-  //     emailAddress: false,
-  //     dateTime: false,
-  //     location: false,
-  //     usSsn: false,
-  //     usDriverLicense: false,
-  //     crypto: false,
-  //     usBankNumber: false,
-  //     creditCard: false,
-  //     ipAddress: false,
-  //   },
-  // ]);
 
   return (
     <>
