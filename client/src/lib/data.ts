@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+// import { createContext } from 'react';
 
 export type UnsavedFilterSet = {
   label: string;
@@ -25,42 +25,91 @@ export type Message = {
   sender: 'user' | 'ai' | 'security';
 };
 
-const filterSets = createContext<FilterSet[]>([
-  {
-    filterSetId: 1,
-    label: 'first',
-    person: true,
-    phoneNumber: true,
-    emailAddress: true,
-    dateTime: true,
-    location: true,
-    usSsn: true,
-    usDriverLicense: true,
-    crypto: true,
-    usBankNumber: true,
-    creditCard: true,
-    ipAddress: true,
-  },
-  {
-    filterSetId: 2,
-    label: 'second',
-    person: false,
-    phoneNumber: true,
-    emailAddress: false,
-    dateTime: false,
-    location: false,
-    usSsn: false,
-    usDriverLicense: false,
-    crypto: false,
-    usBankNumber: false,
-    creditCard: false,
-    ipAddress: false,
-  },
-]);
+// const filterSets = createContext<FilterSet[]>([
+//   {
+//     filterSetId: 1,
+//     label: 'first',
+//     person: true,
+//     phoneNumber: true,
+//     emailAddress: true,
+//     dateTime: true,
+//     location: true,
+//     usSsn: true,
+//     usDriverLicense: true,
+//     crypto: true,
+//     usBankNumber: true,
+//     creditCard: true,
+//     ipAddress: true,
+//   },
+//   {
+//     filterSetId: 2,
+//     label: 'second',
+//     person: false,
+//     phoneNumber: true,
+//     emailAddress: false,
+//     dateTime: false,
+//     location: false,
+//     usSsn: false,
+//     usDriverLicense: false,
+//     crypto: false,
+//     usBankNumber: false,
+//     creditCard: false,
+//     ipAddress: false,
+//   },
+// ]);
 
-console.log('filterSets', filterSets);
+// console.log('filterSets', filterSets);
 
-/** Sends raw text and filter set applied request,
+export const tokenKey = 'um.token';
+
+export function saveToken(token: string | undefined): void {
+  if (token) {
+    sessionStorage.setItem(tokenKey, token);
+  } else {
+    sessionStorage.removeItem(tokenKey);
+  }
+}
+
+export function readToken(): string | null {
+  return sessionStorage.getItem(tokenKey); // return token
+}
+
+export async function readAccountSets(token: string) {
+  const req = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const res = await fetch('/api/filter-sets', req);
+  if (!res.ok) {
+    // throw error when token should be valid but isn't
+    throw new Error(`Failed to retrieve Filter Sets. Status: ${res.status}.`);
+  }
+  const filterSets = await res.json();
+  // will be logged as unexpected error
+  if (!filterSets) throw 'Data retrieval services are possibly down.';
+  return filterSets;
+}
+
+export async function addAccountSet(
+  filterSet: FilterSet,
+  token: string
+): Promise<FilterSet> {
+  const res = await fetch('/api/filter-sets', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(filterSet),
+  });
+  if (!res.ok)
+    throw new Error(`Failed to add Filter Set. Status: ${res.status}.`);
+  const result = await res.json();
+  return result;
+}
+
+/** Sends raw text and Filter Set applied request,
     receives redacted text string response, or error */
 export async function presidioRedaction(
   inputText: string,
@@ -73,10 +122,11 @@ export async function presidioRedaction(
   };
   const res = await fetch('/api/presidio', req);
   if (!res.ok) {
-    throw new Error(`fetch Error ${res.status}`);
+    throw new Error(`Redaction request failed with Status: ${res.status}`);
   }
   const redacted = await res.json();
-  if (!redacted.presidio) throw new Error('Redaction Error!');
+  // will be logged as unexpected error
+  if (!redacted.presidio) throw 'Redaction services are possibly down.';
   return redacted.presidio;
 }
 
@@ -86,11 +136,12 @@ export async function promptChatGPT(inputText: string): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: inputText }),
   };
-  const res = await fetch('/api/open-ai', req);
+  const res = await fetch('/api/openai', req);
   if (!res.ok) {
-    throw new Error(`fetch Error ${res.status}`);
+    throw new Error(`Ai request failed with Status ${res.status}`);
   }
   const aiMessage = await res.json();
-  if (!aiMessage.analysis) throw new Error('Analysis Error!');
+  // will be logged as unexpected error
+  if (!aiMessage.analysis) throw 'Ai services are possibly down.';
   return aiMessage.analysis;
 }

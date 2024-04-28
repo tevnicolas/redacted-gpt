@@ -101,7 +101,7 @@ app.post('/api/auth/sign-in', async (req, res, next) => {
   }
 });
 
-app.get('/api/filterSets', authMiddleware, async (req, res, next) => {
+app.get('/api/filter-sets', authMiddleware, async (req, res, next) => {
   try {
     const sql = `
       select *
@@ -116,7 +116,7 @@ app.get('/api/filterSets', authMiddleware, async (req, res, next) => {
   }
 });
 
-app.post('/api/filterSets', authMiddleware, async (req, res, next) => {
+app.post('/api/filter-sets', authMiddleware, async (req, res, next) => {
   try {
     const filters = [
       req.body.label,
@@ -167,7 +167,7 @@ app.post('/api/filterSets', authMiddleware, async (req, res, next) => {
 });
 
 app.put(
-  '/api/filterSets/:filterSetId',
+  '/api/filter-sets/:filterSetId',
   authMiddleware,
   async (req, res, next) => {
     try {
@@ -242,7 +242,7 @@ app.put(
 );
 
 app.delete(
-  '/api/filterSets/:filterSetId',
+  '/api/filter-sets/:filterSetId',
   authMiddleware,
   async (req, res, next) => {
     try {
@@ -286,7 +286,7 @@ app.post('/api/presidio', async (req, res, next) => {
   }
 });
 
-app.post('/api/open-ai', async (req, res, next) => {
+app.post('/api/openai', async (req, res, next) => {
   try {
     const { prompt } = req.body;
     const threadId = await startAnalysisThread(prompt);
