@@ -1,22 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Switch from 'react-switch';
 import { useFilterSets } from '../components/useFilterSets';
 import { FilterSet, UnsavedFilterSet } from '../lib/data';
-import { defaultFilterSet } from '../lib/defaultFilterSet';
+import { defaultFilterSet } from '../lib/default-filter-set';
+import { Button } from '../components/Button';
 
 export function FilterSetsPage() {
   const { filterSets, addFilterSet } = useFilterSets();
-  const [filterSet, setFilterSet] = useState<
-    FilterSet | UnsavedFilterSet | undefined
-  >();
+  const [filterSet, setFilterSet] = useState<FilterSet | UnsavedFilterSet>(
+    defaultFilterSet
+  );
+  const selectedIndex = useRef<number>(0);
+  console.log(selectedIndex.current);
+  useEffect(() => {
+    if (!filterSets.length) return;
+    selectedIndex.current = 0;
+    setFilterSet(filterSets[selectedIndex.current]);
+  }, [filterSets]);
 
-  function handleFilterChange(filter: keyof FilterSet) {
+  function handleFilterChange(
+    filter: keyof FilterSet | keyof UnsavedFilterSet
+  ) {
     setFilterSet((prev) => {
-      // Check for undefined and handle it
-      if (!prev) {
-        return { ...defaultFilterSet, [filter]: true };
-      }
-      // Toggle property while preserving type structure
+      // Toggle property while keeping other properties the same
       return {
         ...prev,
         [filter]: !prev[filter],
@@ -34,75 +40,126 @@ export function FilterSetsPage() {
               return (
                 <LoggedFilterSet
                   key={index}
+                  isSelected={index === selectedIndex.current}
                   label={value.label}
-                  onClick={() => setFilterSet(value)}
+                  onClick={() => {
+                    selectedIndex.current = index;
+                    setFilterSet(value);
+                  }}
                 />
               );
             })}
           </div>
-          <div className="flex absolute w-8 h-8 rounded-[40px] bg-mygrey right-8 top-4">
-            <div className="relative flex justify-center items-center w-full h-full">
-              <div className="absolute bg-mywhite w-4 h-[3px] rounded-[40px]" />
-              <div className="absolute bg-mywhite h-4 w-[3px] rounded-[40px]" />
-            </div>
+          <AddButton />
+        </div>
+      </div>
+      <div className="flex w-full justify-center mt-[20px] mb-[40px]">
+        <div className="flex space-around w-[50vw] max-w-[410px]">
+          <div className="flex w-full justify-end">
+            <Button
+              type="button"
+              text="Edit"
+              className="bg-mygrey text-[13px] max-w-[55px]"
+            />
+          </div>
+          <div className="flex w-full justify-center">
+            <Button
+              type="button"
+              text="Save"
+              className="bg-mygrey text-[13px] max-w-[55px]"
+            />
+          </div>
+          <div className="flex w-full justify-start">
+            <Button
+              type="button"
+              text="Delete"
+              className="bg-mygrey text-[13px] max-w-[55px]"
+            />
           </div>
         </div>
       </div>
-      <Filters filterSet={filterSet} handleChange={handleFilterChange} />
+      <div className="flex justify-center w-full">
+        <div className="flex flex-wrap w-[50vw] h-[294px] max-w-[410px]">
+          {Object.entries(filterSet).map(([key, value]) => {
+            if (key === 'label' || key === 'filterSetId') return; //ensures bool
+            return (
+              <Filter
+                key={key}
+                label={key}
+                isEnabled={value as boolean}
+                onChange={() => handleFilterChange(key as keyof FilterSet)}
+              />
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
 
 type LoggedFilterSetProps = {
-  onClick: () => void;
+  isSelected: boolean;
   label: string; // whole set label
+  onClick: () => void;
 };
 
-function LoggedFilterSet({ onClick }: LoggedFilterSetProps) {
+function LoggedFilterSet({ isSelected, label, onClick }: LoggedFilterSetProps) {
   return (
     <input
-      className={`w-[calc(100%-30px)] text-black bg-mywhite focus:outline-none focus:bg-myyellow mt-[1px] mb-[1px] pl-2 pr-2`}
+      value={label}
+      className={`w-[calc(100%-30px)] text-black focus:outline-none mt-[1px] mb-[1px] pl-2 pr-2 select-none ${
+        isSelected ? 'bg-myyellow' : 'bg-mywhite'
+      }`}
       readOnly={true}
-      onClick={onClick}>
-      Hello
-    </input>
+      onClick={onClick}
+    />
   );
 }
 
-type FiltersProps = {
-  filterSet: FilterSet | UnsavedFilterSet | undefined;
-  handleChange: (filter: keyof FilterSet) => void;
-};
-
-function Filters({ filterSet, handleChange }: FiltersProps) {
+function AddButton() {
   return (
-    <>
-      <div className="flex">
-        <Filter
-          label={'Person'}
-          isEnabled={filterSet?.person || false}
-          handleChange={handleChange}
-        />
+    <div className="flex absolute w-8 h-8 rounded-[40px] bg-mygrey right-8 top-4">
+      <div className="relative flex justify-center items-center w-full h-full">
+        <div className="absolute bg-mywhite w-4 h-[3px] rounded-[40px]" />
+        <div className="absolute bg-mywhite h-4 w-[3px] rounded-[40px]" />
       </div>
-    </>
+    </div>
   );
 }
 
 type FilterProps = {
   label: string; // singular filter label
   isEnabled: boolean;
-  handleChange: (filter: keyof FilterSet) => void;
+  onChange: () => void;
 };
 
-function Filter({ label, isEnabled, handleChange }: FilterProps) {
+function Filter({ label, isEnabled, onChange }: FilterProps) {
+  const titleMappings: { [key: string]: string } = {
+    usSsn: 'US SSN',
+    usDriverLicense: "US Driver's License",
+    usBankNumber: 'US Bank Number',
+    dateTime: 'Date / Time',
+    ipAddress: 'IP Address',
+    creditCard: 'Credit Card',
+    crypto: 'Crypto Wallet',
+    location: 'Location',
+    emailAddress: 'Email Address',
+    phoneNumber: 'Phone Number',
+    person: 'Person',
+  };
+  const title = titleMappings[label];
   return (
-    <label>
-      {label}
-      <Switch
-        checked={isEnabled}
-        onChange={() => handleChange('person')}
-        className="react-switch"
-      />
-    </label>
+    <div className="flex max-w-[410px] w-[calc(50%-6.5vw)] justify-end mr-[6.5vw]  sm:w-[calc(50%-55px)] sm:mr-[55px]">
+      <label className="flex items-center justify-end text-[13px] flex-wrap sm:flex-nowrap">
+        <span className="w-full justify-end m-[5px] flex whitespace-nowrap">
+          {title}
+        </span>
+        <Switch
+          checked={isEnabled}
+          onChange={onChange}
+          className="react-switch"
+        />
+      </label>
+    </div>
   );
 }

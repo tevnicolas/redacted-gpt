@@ -106,7 +106,8 @@ app.get('/api/filter-sets', authMiddleware, async (req, res, next) => {
     const sql = `
       select *
         from "filterSets"
-        where "userId" = $1;
+        where "userId" = $1
+        order by "filterSetId" desc;
     `;
     const result = await db.query<FilterSet>(sql, [req.user?.userId]);
     const filterSets = result.rows;

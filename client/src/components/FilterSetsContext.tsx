@@ -1,9 +1,9 @@
 import { createContext } from 'react';
-import { FilterSet } from '../lib/data';
+import { FilterSet, UnsavedFilterSet } from '../lib/data';
 
 export type FilterSetsContextType = {
-  filterSets: FilterSet[];
-  addFilterSet: (filterSet: FilterSet) => void;
+  filterSets: FilterSet[] | UnsavedFilterSet[];
+  addFilterSet: (filterSet: FilterSet | UnsavedFilterSet) => void;
   // editFilterSet: (filterSet: FilterSet) => void;
   // deleteFilterSet: (filterSet: FilterSet) => void;
 };

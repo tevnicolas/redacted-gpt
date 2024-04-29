@@ -7,7 +7,13 @@ import { AboutPage } from './pages/AboutPage';
 import { SupportPage } from './pages/SupportPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { useEffect, useState } from 'react';
-import { FilterSet, readAccountSets, readToken, saveToken } from './lib/data';
+import {
+  FilterSet,
+  UnsavedFilterSet,
+  readAccountSets,
+  readToken,
+  saveToken,
+} from './lib/data';
 import {
   FilterSetsContextType,
   FilterSetsProvider,
@@ -19,7 +25,9 @@ import { ErrorContextType, ErrorProvider } from './components/ErrorContext';
 export default function App() {
   const [user, setUser] = useState<User>();
   const [token, setToken] = useState<string | undefined>(readToken());
-  const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
+  const [filterSets, setFilterSets] = useState<
+    FilterSet[] | UnsavedFilterSet[]
+  >([]);
   const [error, setError] = useState<unknown>();
 
   function handleSignIn(user: User, token: string) {
@@ -34,8 +42,8 @@ export default function App() {
     saveToken(undefined);
   }
 
-  function addFilterSet(filterSet: FilterSet) {
-    setFilterSets((prevFilterSets) => [...prevFilterSets, filterSet]);
+  function addFilterSet(filterSet: FilterSet | UnsavedFilterSet) {
+    setFilterSets((prevFilterSets) => [filterSet, ...prevFilterSets]);
   }
 
   useEffect(() => {
@@ -44,7 +52,42 @@ export default function App() {
         // if logged out, load Filter Sets from session storage
         if (!token) {
           const sessionData = sessionStorage.getItem('filterSets');
-          setFilterSets(sessionData ? JSON.parse(sessionData) : []);
+          setFilterSets(
+            sessionData
+              ? JSON.parse(sessionData)
+              : [
+                  {
+                    filterSetId: 1,
+                    label: 'first',
+                    person: true,
+                    phoneNumber: true,
+                    emailAddress: true,
+                    dateTime: true,
+                    location: true,
+                    usSsn: true,
+                    usDriverLicense: true,
+                    crypto: true,
+                    usBankNumber: true,
+                    creditCard: true,
+                    ipAddress: true,
+                  },
+                  {
+                    filterSetId: 2,
+                    label: 'second',
+                    person: false,
+                    phoneNumber: true,
+                    emailAddress: false,
+                    dateTime: false,
+                    location: false,
+                    usSsn: false,
+                    usDriverLicense: false,
+                    crypto: false,
+                    usBankNumber: false,
+                    creditCard: false,
+                    ipAddress: false,
+                  },
+                ]
+          );
           return;
         }
         // if logged in, load Filter Sets from account
