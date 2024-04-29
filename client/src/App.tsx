@@ -61,7 +61,6 @@ export default function App() {
   }, [token]);
 
   const errorContextValues: ErrorContextType = { error, setError };
-
   const userContextValues: UserContextType = {
     user,
     token,

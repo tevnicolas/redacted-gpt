@@ -11,9 +11,10 @@ import {
   reqInProgressCheck,
 } from '../lib/errors-checks';
 import { Message } from '../lib/data';
+import { useError } from '../components/useError';
 
 export function HomePage() {
-  const [error, setError] = useState<unknown>();
+  const { error, setError } = useError();
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
   // 'Set' is always referring to Filter Set selection value
@@ -150,13 +151,6 @@ export function HomePage() {
           />
         </div>
       </div>
-      {error && (
-        <h2 className="text-red-500 text-[12px]">
-          {error instanceof Error || error instanceof ValidationError
-            ? String(error)
-            : `An unexpected error occurred: ${error}`}
-        </h2>
-      )}
     </>
   );
 }

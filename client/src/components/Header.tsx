@@ -3,8 +3,10 @@ import { LogIn, Triangle } from './LogIn';
 import { LuMenuSquare } from 'react-icons/lu';
 import { useState, useCallback } from 'react';
 import { FadeInWrapper } from './FadeInWrapper';
+import { useError } from './useError';
 
 export function Header() {
+  const { error } = useError();
   const location = useLocation();
   const [mobileMenuDropdown, setMobileMenuDropdown] = useState(false);
   const [loginDropdown, setLoginDropdown] = useState(false);
@@ -64,6 +66,15 @@ export function Header() {
         key={location.pathname}
         className="flex flex-wrap justify-center w-[100%] mt-14 mb-14 z-0">
         <Outlet />
+        <>
+          {error && (
+            <h2 className="text-red-500 text-[12px]">
+              {error instanceof Error // includes all error types extending Error
+                ? String(error)
+                : `An unexpected error occurred: ${error}`}
+            </h2>
+          )}
+        </>
       </FadeInWrapper>
     </>
   );
