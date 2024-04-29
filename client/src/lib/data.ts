@@ -1,5 +1,7 @@
 // import { createContext } from 'react';
 
+import { UnauthorizedError } from './errors-checks';
+
 export type UnsavedFilterSet = {
   label: string;
   person: boolean;
@@ -70,11 +72,12 @@ export function saveToken(token: string | undefined): void {
   }
 }
 
-export function readToken(): string | null {
-  return sessionStorage.getItem(tokenKey); // return token
+export function readToken(): string | undefined {
+  const token = sessionStorage.getItem(tokenKey);
+  return token !== null ? token : undefined; // transform null to undefined
 }
 
-export async function readAccountSets(token: string) {
+export async function readAccountSets(token: string): Promise<FilterSet[]> {
   const req = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -82,11 +85,20 @@ export async function readAccountSets(token: string) {
   };
   const res = await fetch('/api/filter-sets', req);
   if (!res.ok) {
-    // throw error when token should be valid but isn't
-    throw new Error(`Failed to retrieve Filter Sets. Status: ${res.status}.`);
+    const error =
+      res.status === 401
+        ? // Being explicit about expired token, parent catch will auto sign out
+          new UnauthorizedError(
+            'Your session has expired. Please log in again.'
+          )
+        : // Other error which does not call for sign out
+          new Error(
+            `Something went wrong while retrieving your Filter Sets. Status: ${res.status}.`
+          );
+    throw error;
   }
-  const filterSets = await res.json();
-  // will be logged as unexpected error
+  const filterSets: FilterSet[] = await res.json();
+  // Will be caught as unexpected error
   if (!filterSets) throw 'Data retrieval services are possibly down.';
   return filterSets;
 }

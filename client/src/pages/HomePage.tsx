@@ -9,7 +9,7 @@ import {
   validateSubmission,
   ValidationError,
   reqInProgressCheck,
-} from '../lib/requestValidationErrors';
+} from '../lib/errors-checks';
 import { Message } from '../lib/data';
 
 export function HomePage() {
@@ -31,7 +31,7 @@ export function HomePage() {
   useEffect(() => {
     // If messages changes, session storage is updated
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
-    // Resets inputText if security wasn't redacting, focuses on WriteBox
+    // Resets inputText if security wasn't redacting, (need to add focus on WriteBox)
     if (messages[messages.length - 1]?.sender !== 'security') {
       setInputText('');
     }

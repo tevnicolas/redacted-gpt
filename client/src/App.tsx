@@ -8,13 +8,19 @@ import { SupportPage } from './pages/SupportPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { useEffect, useState } from 'react';
 import { FilterSet, readAccountSets, readToken, saveToken } from './lib/data';
-import { FilterSetsProvider } from './components/FilterSetsContext';
-import { User, UserProvider } from './components/UserContext';
+import {
+  FilterSetsContextType,
+  FilterSetsProvider,
+} from './components/FilterSetsContext';
+import { User, UserContextType, UserProvider } from './components/UserContext';
+import { UnauthorizedError } from './lib/errors-checks';
+import { ErrorContextType, ErrorProvider } from './components/ErrorContext';
 
 export default function App() {
   const [user, setUser] = useState<User>();
-  const [token, setToken] = useState<string | null>(readToken());
+  const [token, setToken] = useState<string | undefined>(readToken());
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
+  const [error, setError] = useState<unknown>();
 
   function handleSignIn(user: User, token: string) {
     setUser(user);
@@ -23,14 +29,12 @@ export default function App() {
   }
 
   function handleSignOut() {
-    console.log('logged out!');
     setUser(undefined);
-    setToken(null); // think about changing to undefined?
+    setToken(undefined);
     saveToken(undefined);
   }
 
   function addFilterSet(filterSet: FilterSet) {
-    //double check
     setFilterSets((prevFilterSets) => [...prevFilterSets, filterSet]);
   }
 
@@ -40,36 +44,49 @@ export default function App() {
         // if logged out, load Filter Sets from session storage
         if (!token) {
           const sessionData = sessionStorage.getItem('filterSets');
-          sessionData
-            ? setFilterSets(JSON.parse(sessionData))
-            : setFilterSets([]);
+          setFilterSets(sessionData ? JSON.parse(sessionData) : []);
           return;
         }
         // if logged in, load Filter Sets from account
         const accountData = await readAccountSets(token);
         setFilterSets(accountData);
       } catch (error) {
-        console.log(error);
+        setError(error);
+        if (error instanceof UnauthorizedError) {
+          handleSignOut();
+        }
       }
     }
     loadFilterSets();
   }, [token]);
 
-  const userContextValue = { user, token, handleSignIn, handleSignOut };
-  const fSContextValue = { filterSets, addFilterSet };
+  const errorContextValues: ErrorContextType = { error, setError };
+
+  const userContextValues: UserContextType = {
+    user,
+    token,
+    handleSignIn,
+    handleSignOut,
+  };
+  const filterSetsContextValues: FilterSetsContextType = {
+    filterSets,
+    addFilterSet,
+  };
   return (
-    <UserProvider value={userContextValue}>
-      <FilterSetsProvider value={fSContextValue}>
-        <Routes>
-          <Route path="/" element={<Header />}>
-            <Route index element={<HomePage />} />
-            <Route path="filter-sets" element={<FilterSetsPage />} />
-            <Route path="about" element={<AboutPage />} />
-            <Route path="support" element={<SupportPage />} />
-          </Route>
-          <Route path="/sign-up" element={<SignUpPage />} />
-        </Routes>
-      </FilterSetsProvider>
-    </UserProvider>
+    <ErrorProvider value={errorContextValues}>
+      <UserProvider value={userContextValues}>
+        <FilterSetsProvider value={filterSetsContextValues}>
+          <Routes>
+            <Route path="/" element={<Header />}>
+              <Route index element={<HomePage />} />
+              <Route path="filter-sets" element={<FilterSetsPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="support" element={<SupportPage />} />
+            </Route>
+            <Route path="/sign-up" element={<SignUpPage />} />
+          </Routes>
+        </FilterSetsProvider>
+      </UserProvider>
+    </ErrorProvider>
   );
 }

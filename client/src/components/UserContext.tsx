@@ -5,15 +5,15 @@ export type User = {
   username: string;
 };
 
-export type UserContextValues = {
+export type UserContextType = {
   user: User | undefined;
-  token: string | null;
+  token: string | undefined;
   handleSignIn: (user: User, token: string) => void;
   handleSignOut: () => void;
 };
-export const UserContext = createContext<UserContextValues>({
+export const UserContext = createContext<UserContextType>({
   user: undefined,
-  token: null,
+  token: undefined,
   handleSignIn: () => undefined,
   handleSignOut: () => undefined,
 });
