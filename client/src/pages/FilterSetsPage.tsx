@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Switch from 'react-switch';
 import { useFilterSets } from '../components/useFilterSets';
 import { FilterSet, UnsavedFilterSet } from '../lib/data';
@@ -11,42 +11,24 @@ export function FilterSetsPage() {
   const [editing, setEditing] = useState<
     FilterSet | UnsavedFilterSet | undefined
   >();
-  const [renderedFrom, setRenderedFrom] = useState<
-    FilterSet | UnsavedFilterSet
-  >(defaultFilterSet);
 
-  useEffect(() => {
-    // if (!filterSets.length) {
-    //   addFilterSet(defaultFilterSet);
-    //   setCurrentIndex(0);
-    //   setEditing(defaultFilterSet);
-    // }
-    const source = filterSets.length
-      ? filterSets[currentIndex]
-      : defaultFilterSet;
-    setRenderedFrom(source);
-  }, [filterSets, currentIndex]);
-
-  function handleDraftedChange(
-    key: keyof FilterSet | keyof UnsavedFilterSet,
-    labelValue?: string
-  ) {
+  function handleLabelChange(labelValue: string): void {
     if (!editing) return;
-    // Change label
-    if (key === 'label') {
-      if (labelValue === undefined) return; // should never happen
-      setEditing((prev) => {
-        if (!prev) return;
-        return {
-          ...prev,
-          [key]: labelValue,
-        };
-      });
-      return;
-    }
-    // Toggle filter boolean while keeping other properties the same
+    if (labelValue === undefined) return; // should never happen
     setEditing((prev) => {
-      if (!prev) return;
+      if (!prev) return; // should never happen
+      return {
+        ...prev,
+        ['label']: labelValue,
+      };
+    });
+    return;
+  }
+
+  function handleFilterChange(key: string): void {
+    if (!editing) return;
+    setEditing((prev) => {
+      if (!prev) return; // should never happen
       return {
         ...prev,
         [key]: !prev[key],
@@ -54,13 +36,18 @@ export function FilterSetsPage() {
     });
   }
 
-  function handleAddClick() {
+  function handleAdd(): void {
     addFilterSet(defaultFilterSet);
     setEditing(defaultFilterSet);
   }
-
-  // Filters are mapped from default false values if no filter sets
-  // Otherwise they are mapped from / reflect the current filter set
+  function handleEdit(): void {
+    if (!filterSets.length) addFilterSet(defaultFilterSet);
+    setEditing(filterSets[currentIndex]);
+  }
+  function handleSave(): void {
+    editFilterSet(editing, currentIndex);
+    setEditing(undefined);
+  }
 
   return (
     <div className="flex flex-wrap justify-center">
@@ -74,16 +61,16 @@ export function FilterSetsPage() {
                   label={value.label}
                   isSelected={index === currentIndex}
                   onClick={() => {
-                    if (editing) return; // Don't select while editing
+                    if (editing) return; // Don't select another while editing
                     setCurrentIndex(index);
                   }}
                   editing={editing}
-                  onChange={handleDraftedChange}
+                  onChange={handleLabelChange}
                 />
               );
             })}
           </div>
-          <AddButton onClick={handleAddClick} />
+          <AddButton onClick={handleAdd} />
         </div>
       </div>
       <div className="flex w-full justify-center mt-[20px] mb-[40px]">
@@ -95,10 +82,7 @@ export function FilterSetsPage() {
                   type="button"
                   text="Save"
                   className="bg-mygrey text-[13px] max-w-[55px]"
-                  onClick={() => {
-                    editFilterSet(editing, currentIndex);
-                    setEditing(undefined);
-                  }}
+                  onClick={handleSave}
                 />
               </div>
               <div className="flex w-full justify-center">
@@ -125,10 +109,7 @@ export function FilterSetsPage() {
                 type="button"
                 text="Edit"
                 className="bg-mygrey text-[13px] max-w-[55px]"
-                onClick={() => {
-                  if (!filterSets.length) addFilterSet(defaultFilterSet);
-                  setEditing(filterSets[currentIndex]);
-                }}
+                onClick={handleEdit}
               />
             </div>
           )}
@@ -136,18 +117,24 @@ export function FilterSetsPage() {
       </div>
       <div className="flex justify-center w-full">
         <div className="flex flex-wrap w-[50vw] h-[294px] max-w-[410px]">
-          {Object.entries(renderedFrom).map(([key, value]) => {
-            if (key === 'label' || key === 'filterSetId') return; //ensures bool
-            return (
-              <Filter
-                key={key}
-                editing={editing}
-                name={key}
-                isEnabled={value as boolean}
-                onChange={() => handleDraftedChange(key as keyof FilterSet)}
-              />
-            );
-          })}
+          {
+            // Will render first from editing (if editing), or currentSet (if at least 1 filterSet), or defaultSet if first two conditions fail
+            Object.entries(
+              editing || filterSets[currentIndex] || defaultFilterSet
+            ).map(([key, value]) => {
+              //check to ensure boolean 'value' passed
+              if (key === 'label' || key === 'filterSetId') return;
+              return (
+                <Filter
+                  key={key}
+                  editing={editing}
+                  name={key}
+                  isEnabled={value as boolean}
+                  onClick={handleFilterChange}
+                />
+              );
+            })
+          }
         </div>
       </div>
     </div>
@@ -159,7 +146,7 @@ type LoggedFilterSetProps = {
   isSelected: boolean;
   onClick: () => void;
   editing: FilterSet | UnsavedFilterSet | undefined;
-  onChange: (key: keyof FilterSet | keyof UnsavedFilterSet, e: string) => void;
+  onChange: (e: string) => void;
 };
 
 function LoggedFilterSet({
@@ -172,11 +159,11 @@ function LoggedFilterSet({
   return (
     <input
       value={editing && isSelected ? editing.label : label}
-      onChange={(e) => onChange('label', e.currentTarget.value)}
+      onChange={(e) => onChange(e.currentTarget.value)}
       className={`w-[calc(100%-30px)] text-black focus:outline-none mt-[1px] mb-[1px] pl-2 pr-2 select-none cursor-pointer ${
         isSelected ? 'bg-myyellow' : 'bg-mywhite'
       }`}
-      // allow editing (false) if isSelected and isEditing are both true
+      // allow editing (readOnly=false) if isSelected, editing are both truthy
       readOnly={!(isSelected && editing)}
       onClick={onClick}
     />
@@ -204,11 +191,11 @@ type FilterProps = {
   name: string;
   isEnabled: boolean;
   editing: FilterSet | UnsavedFilterSet | undefined;
-  onChange: (key: keyof FilterSet | keyof UnsavedFilterSet) => void;
+  onClick: (key: string) => void;
 };
 
-function Filter({ name, isEnabled, onChange, editing }: FilterProps) {
-  const titleMappings: { [key: string]: string } = {
+function Filter({ name, isEnabled, onClick, editing }: FilterProps) {
+  const titleMappings: Record<string, string> = {
     usSsn: 'US SSN',
     usDriverLicense: "US Driver's License",
     usBankNumber: 'US Bank Number',
@@ -225,18 +212,15 @@ function Filter({ name, isEnabled, onChange, editing }: FilterProps) {
   return (
     <div className="flex max-w-[410px] w-[calc(50%-6.5vw)] justify-end mr-[6.5vw]  sm:w-[calc(50%-55px)] sm:mr-[55px]">
       <label
-        onClick={() =>
-          onChange(name as keyof FilterSet | keyof UnsavedFilterSet)
-        }
+        onClick={() => onClick(name)}
         className="flex items-center justify-end text-[13px] flex-wrap cursor-pointer sm:flex-nowrap">
         <span className="w-full justify-end mr-[5px] flex whitespace-nowrap">
           {title}
         </span>
         <Switch
           checked={editing ? editing[name] : isEnabled}
-          onChange={() =>
-            onChange(name as keyof FilterSet | keyof UnsavedFilterSet)
-          }
+          onClick={() => onClick(name)}
+          onChange={() => {}} // requires onChange, though only works right when the function is passed to onClick -> so giving it a nothing fn
           className="react-switch"
         />
       </label>

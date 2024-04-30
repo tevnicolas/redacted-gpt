@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+// import { useFilterSets } from './useFilterSets';
 
 type SelectFilterSetProps = {
   setIsRedacted: (value: boolean) => void;
@@ -15,6 +16,7 @@ export function SelectFilterSet({
   setCurrentSet,
 }: SelectFilterSetProps) {
   const navigate = useNavigate();
+  // const { filterSets } = useFilterSets();
 
   /* This logic determines whether redaction should graduate to prompting, or whether to instead create a new filter set */
   useEffect(() => {
@@ -43,12 +45,22 @@ export function SelectFilterSet({
           currentSet === 'review' && 'border-blue-500'
         }`}>
         <option value="initial">Filter Set ---choose below---</option>
+        <option value="create">+Create Custom Filter Set</option>
         <option className="hidden" value="review">
           Review
         </option>
         <option value="none">None</option>
         <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="create">+Create Filter Set</option>
+        <option value="PHONE_NUMBER">Email Address</option>
+        <option value="PHONE_NUMBER">Location</option>
+        <option value="PHONE_NUMBER">US Driver's License</option>
+        <option value="PHONE_NUMBER">US Bank Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
       </select>
     </div>
   );
