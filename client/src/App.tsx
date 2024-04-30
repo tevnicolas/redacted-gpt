@@ -46,48 +46,29 @@ export default function App() {
     setFilterSets((prevFilterSets) => [filterSet, ...prevFilterSets]);
   }
 
+  function editFilterSet(
+    filterSet: FilterSet | UnsavedFilterSet | undefined,
+    index: number
+  ) {
+    if (!filterSet) return;
+    setFilterSets((prevFilterSets) => {
+      const newFilterSets = [...prevFilterSets];
+      newFilterSets[index] = filterSet;
+      return newFilterSets;
+    });
+  }
+
+  useEffect(() => {
+    sessionStorage.setItem('filterSets', JSON.stringify(filterSets));
+  }, [filterSets]);
+
   useEffect(() => {
     async function loadFilterSets() {
       try {
         // if logged out, load Filter Sets from session storage
         if (!token) {
           const sessionData = sessionStorage.getItem('filterSets');
-          setFilterSets(
-            sessionData
-              ? JSON.parse(sessionData)
-              : [
-                  {
-                    filterSetId: 1,
-                    label: 'first',
-                    person: true,
-                    phoneNumber: true,
-                    emailAddress: true,
-                    dateTime: true,
-                    location: true,
-                    usSsn: true,
-                    usDriverLicense: true,
-                    crypto: true,
-                    usBankNumber: true,
-                    creditCard: true,
-                    ipAddress: true,
-                  },
-                  {
-                    filterSetId: 2,
-                    label: 'second',
-                    person: false,
-                    phoneNumber: true,
-                    emailAddress: false,
-                    dateTime: false,
-                    location: false,
-                    usSsn: false,
-                    usDriverLicense: false,
-                    crypto: false,
-                    usBankNumber: false,
-                    creditCard: false,
-                    ipAddress: false,
-                  },
-                ]
-          );
+          setFilterSets(sessionData ? JSON.parse(sessionData) : []);
           return;
         }
         // if logged in, load Filter Sets from account
@@ -113,6 +94,7 @@ export default function App() {
   const filterSetsContextValues: FilterSetsContextType = {
     filterSets,
     addFilterSet,
+    editFilterSet,
   };
   return (
     <ErrorProvider value={errorContextValues}>
