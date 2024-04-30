@@ -43,16 +43,16 @@ export default function App() {
   }
 
   function addFilterSet(filterSet: FilterSet | UnsavedFilterSet) {
-    // creating a variable here is important so that sessionStorage can be updated synchronously
-    const newFilterSets = [...filterSets, filterSet];
+    // important to create a variable, so that sessionStorage will be updated synchronously
+    const newFilterSets = [filterSet, ...filterSets];
     setFilterSets(newFilterSets);
-    // Don't try moving to useEffect dependent on filterSets, it creates a race condition with loadFilterSets(). Keep code rewritten for each action fn
+    // important to keep this code rewritten at the end of each action fn, as putting it in a useEffect with filterSets as a dependency creates a race condition with loadFilterSets().
     sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
   }
 
   function editFilterSet(
     filterSet: FilterSet | UnsavedFilterSet | undefined,
-    index: number // important to update with index, unsaved filterSets lack id
+    index: number
   ) {
     if (!filterSet) return;
     const newFilterSets = [...filterSets];
@@ -95,6 +95,7 @@ export default function App() {
     addFilterSet,
     editFilterSet,
   };
+
   return (
     <ErrorProvider value={errorContextValues}>
       <UserProvider value={userContextValues}>
