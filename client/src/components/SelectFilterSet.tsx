@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useFilterSets } from './useFilterSets';
 
 type SelectFilterSetProps = {
   setIsRedacted: (value: boolean) => void;
-  // will implement... filterSets: FilterSet[] | UnsavedFilterSet[];
-  // will implement... currentSet: FilterSet | UnsavedFilterSet;
   currentSet: string;
   setCurrentSet: (e: string) => void;
 };
@@ -15,6 +14,8 @@ export function SelectFilterSet({
   setCurrentSet,
 }: SelectFilterSetProps) {
   const navigate = useNavigate();
+  const { filterSets } = useFilterSets();
+  console.log(filterSets); // will implement rendering options based on filterSets
 
   /* This logic determines whether redaction should graduate to prompting, or whether to instead create a new filter set */
   useEffect(() => {
@@ -43,12 +44,23 @@ export function SelectFilterSet({
           currentSet === 'review' && 'border-blue-500'
         }`}>
         <option value="initial">Filter Set ---choose below---</option>
+        <option value="create">+Create Custom Filter Set</option>
         <option className="hidden" value="review">
           Review
         </option>
+        {/* Will implement options based on filterSets */}
         <option value="none">None</option>
         <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="create">+Create Filter Set</option>
+        <option value="PHONE_NUMBER">Email Address</option>
+        <option value="PHONE_NUMBER">Location</option>
+        <option value="PHONE_NUMBER">US Driver's License</option>
+        <option value="PHONE_NUMBER">US Bank Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
+        <option value="PHONE_NUMBER">Phone Number</option>
       </select>
     </div>
   );

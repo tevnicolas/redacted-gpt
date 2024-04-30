@@ -1,41 +1,116 @@
-// import { useEffect, useState } from 'react';
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { Header } from './components/Header';
-import { Home } from './pages/Home';
-import { FilterSets } from './pages/FilterSets';
-import { About } from './pages/About';
-import { Support } from './pages/Support';
-import { SignUp } from './pages/SignUp';
+import { HomePage } from './pages/HomePage';
+import { FilterSetsPage } from './pages/FilterSetsPage';
+import { AboutPage } from './pages/AboutPage';
+import { SupportPage } from './pages/SupportPage';
+import { SignUpPage } from './pages/SignUpPage';
+import { useEffect, useState } from 'react';
+import {
+  FilterSet,
+  UnsavedFilterSet,
+  readAccountSets,
+  readToken,
+  saveToken,
+} from './lib/data';
+import {
+  FilterSetsContextType,
+  FilterSetsProvider,
+} from './components/FilterSetsContext';
+import { User, UserContextType, UserProvider } from './components/UserContext';
+import { UnauthorizedError } from './lib/errors-checks';
+import { ErrorContextType, ErrorProvider } from './components/ErrorContext';
 
 export default function App() {
-  // state for filter sets (inside of context)
-  // inside context add and remove functions
-  // if not signed in, add function puts it in local storage
-  // useEffect(() => { // use effect will read them if logged in
-  //   async function readServerData() {
-  //     const resp = await fetch('/api/hello');
-  //     const data = await resp.json();
+  const [user, setUser] = useState<User>();
+  const [token, setToken] = useState<string | undefined>(readToken());
+  const [filterSets, setFilterSets] = useState<
+    FilterSet[] | UnsavedFilterSet[]
+  >([]);
+  const [error, setError] = useState<unknown>();
 
-  //     console.log('Data from server:', data);
+  function handleSignIn(user: User, token: string) {
+    setUser(user);
+    setToken(token);
+    saveToken(token);
+  }
 
-  //     setServerData(data.message);
-  //   }
+  function handleSignOut() {
+    setUser(undefined);
+    setToken(undefined);
+    saveToken(undefined);
+  }
 
-  //   readServerData();
-  // }, []);
+  function addFilterSet(filterSet: FilterSet | UnsavedFilterSet) {
+    // important to create a variable, so that sessionStorage will be updated synchronously
+    const newFilterSets = [filterSet, ...filterSets];
+    setFilterSets(newFilterSets);
+    // important to keep this code rewritten at the end of each action fn, as putting it in a useEffect with filterSets as a dependency creates a race condition with loadFilterSets().
+    sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
+  }
+
+  function editFilterSet(
+    filterSet: FilterSet | UnsavedFilterSet | undefined,
+    index: number
+  ) {
+    if (!filterSet) return;
+    const newFilterSets = [...filterSets];
+    newFilterSets[index] = filterSet;
+    setFilterSets(newFilterSets);
+    sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
+  }
+
+  useEffect(() => {
+    async function loadFilterSets() {
+      try {
+        // if logged out, load Filter Sets from session storage
+        if (!token) {
+          const sessionData = sessionStorage.getItem('filterSets');
+          setFilterSets(sessionData ? JSON.parse(sessionData) : []);
+          return;
+        }
+        // if logged in, load Filter Sets from account
+        const accountData = await readAccountSets(token);
+        setFilterSets(accountData);
+      } catch (error) {
+        setError(error);
+        if (error instanceof UnauthorizedError) {
+          handleSignOut();
+        }
+      }
+    }
+    loadFilterSets();
+  }, [token]);
+
+  const errorContextValues: ErrorContextType = { error, setError };
+  const userContextValues: UserContextType = {
+    user,
+    token,
+    handleSignIn,
+    handleSignOut,
+  };
+  const filterSetsContextValues: FilterSetsContextType = {
+    filterSets,
+    addFilterSet,
+    editFilterSet,
+  };
 
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Header />}>
-          <Route index element={<Home />} />
-          <Route path="filter-sets" element={<FilterSets />} />
-          <Route path="about" element={<About />} />
-          <Route path="support" element={<Support />} />
-        </Route>
-        <Route path="/sign-up" element={<SignUp />} />
-      </Routes>
-    </>
+    <ErrorProvider value={errorContextValues}>
+      <UserProvider value={userContextValues}>
+        <FilterSetsProvider value={filterSetsContextValues}>
+          <Routes>
+            <Route path="/" element={<Header />}>
+              <Route index element={<HomePage />} />
+              <Route path="filter-sets" element={<FilterSetsPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="support" element={<SupportPage />} />
+            </Route>
+            <Route path="/sign-up" element={<SignUpPage />} />
+          </Routes>
+        </FilterSetsProvider>
+      </UserProvider>
+    </ErrorProvider>
   );
 }

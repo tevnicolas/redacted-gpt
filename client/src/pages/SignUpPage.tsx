@@ -1,7 +1,7 @@
 import { UserPassEntry } from '../components/LogIn';
 import { Button } from '../components/Button';
 
-export function SignUp() {
+export function SignUpPage() {
   return (
     <div className="flex h-[80vh] items-center justify-center">
       <div className="flex justify-center items-center rounded-[500px] bg-myyellow h-[500px] w-[500px]">

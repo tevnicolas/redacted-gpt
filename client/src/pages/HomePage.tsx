@@ -3,17 +3,18 @@ import { SelectFilterSet } from '../components/SelectFilterSet';
 import { WriteBox } from '../components/WriteBox';
 import { RedactOrPrompt } from '../components/RedactOrPrompt';
 import { Display } from '../components/Display';
-import { presidioRedaction, promptChatGPT } from '../lib/apiData';
+import { presidioRedaction, promptChatGPT } from '../lib/data';
 import {
   ReqInProgressError,
   validateSubmission,
   ValidationError,
   reqInProgressCheck,
-} from '../lib/requestValidationErrors';
-import { Message } from '../lib/messageData';
+} from '../lib/errors-checks';
+import { Message } from '../lib/data';
+import { useError } from '../components/useError';
 
-export function Home() {
-  const [error, setError] = useState<unknown>();
+export function HomePage() {
+  const { error, setError } = useError();
   const [inputText, setInputText] = useState('');
   const [isRedacted, setIsRedacted] = useState(false);
   // 'Set' is always referring to Filter Set selection value
@@ -31,7 +32,7 @@ export function Home() {
   useEffect(() => {
     // If messages changes, session storage is updated
     sessionStorage.setItem('chatMessages', JSON.stringify(messages));
-    // Resets inputText if security wasn't redacting, focuses on WriteBox
+    // Resets inputText if security wasn't redacting, (need to add focus on WriteBox)
     if (messages[messages.length - 1]?.sender !== 'security') {
       setInputText('');
     }
@@ -150,13 +151,6 @@ export function Home() {
           />
         </div>
       </div>
-      {error && (
-        <h2 className="text-red-500 text-[12px]">
-          {error instanceof Error || error instanceof ValidationError
-            ? String(error)
-            : `An unexpected error occurred: ${error}`}
-        </h2>
-      )}
     </>
   );
 }
