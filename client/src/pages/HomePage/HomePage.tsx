@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { SelectFilterSet } from '../components/SelectFilterSet';
-import { WriteBox } from '../components/WriteBox';
-import { RedactOrPrompt } from '../components/RedactOrPrompt';
-import { Display } from '../components/Display';
-import { presidioRedaction, promptChatGPT } from '../lib/data';
+import { SelectFilterSet } from './SelectFilterSet';
+import { WriteBox } from './WriteBox';
+import { RedactOrPrompt } from './RedactOrPrompt';
+import { Display } from './Display';
+import { presidioRedaction, promptChatGPT } from '../../lib/data';
 import {
   ReqInProgressError,
   validateSubmission,
   ValidationError,
   reqInProgressCheck,
-} from '../lib/errors-checks';
-import { Message } from '../lib/data';
-import { useError } from '../components/useError';
+} from '../../lib/errors-checks';
+import { Message } from '../../lib/data';
+import { useError } from '../../components/useError';
 
 export function HomePage() {
   const { error, setError } = useError();

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useFilterSets } from './useFilterSets';
+import { useFilterSets } from '../../components/useFilterSets';
+import { titleMappings } from '../../lib/title-mappings';
 
 type SelectFilterSetProps = {
   setIsRedacted: (value: boolean) => void;
@@ -15,7 +16,6 @@ export function SelectFilterSet({
 }: SelectFilterSetProps) {
   const navigate = useNavigate();
   const { filterSets } = useFilterSets();
-  console.log(filterSets); // will implement rendering options based on filterSets
 
   /* This logic determines whether redaction should graduate to prompting, or whether to instead create a new filter set */
   useEffect(() => {
@@ -35,6 +35,14 @@ export function SelectFilterSet({
     }
   }, [currentSet, setIsRedacted, navigate]);
 
+  /* This is to map out the filter's names to their corresponding Upper Snake Case, which is what Presidio's redactor uses to apply the filters */
+  const valueMappings: Record<string, string> = {};
+  Object.keys(titleMappings).forEach((key) => {
+    valueMappings[key] = key
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .toLocaleUpperCase();
+  });
+
   return (
     <div className="mt-[15px]">
       <select
@@ -44,23 +52,31 @@ export function SelectFilterSet({
           currentSet === 'review' && 'border-blue-500'
         }`}>
         <option value="initial">Filter Set ---choose below---</option>
-        <option value="create">+Create Custom Filter Set</option>
+        <option value="create">+Create Filter Set</option>
         <option className="hidden" value="review">
           Review
         </option>
-        {/* Will implement options based on filterSets */}
         <option value="none">None</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Email Address</option>
-        <option value="PHONE_NUMBER">Location</option>
-        <option value="PHONE_NUMBER">US Driver's License</option>
-        <option value="PHONE_NUMBER">US Bank Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
-        <option value="PHONE_NUMBER">Phone Number</option>
+
+        {
+          // Filter Sets selectable
+          filterSets.map((set) => {
+            let sumValues = ''; // will represent all filters enabled in a set
+            Object.entries(set).forEach(([key, value]) => {
+              if (typeof value !== 'boolean') return; // No non filter values
+              if (value) sumValues += valueMappings[key] + ' '; // + true filters
+            });
+            return <option value={sumValues}>{set.label}</option>;
+          })
+        }
+        {
+          // Default filters selectable
+          Object.keys(valueMappings).map((key) => {
+            return (
+              <option value={valueMappings[key]}>{titleMappings[key]}</option>
+            );
+          })
+        }
       </select>
     </div>
   );

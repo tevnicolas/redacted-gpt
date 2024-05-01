@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import Switch from 'react-switch';
-import { useFilterSets } from '../components/useFilterSets';
-import { FilterSet, UnsavedFilterSet } from '../lib/data';
-import { defaultFilterSet } from '../lib/default-filter-set';
-import { Button } from '../components/Button';
+import { useFilterSets } from '../../components/useFilterSets';
+import { FilterSet, UnsavedFilterSet } from '../../lib/data';
+import { defaultFilterSet } from '../../lib/default-filter-set';
+import { Button } from '../../components/Button';
+import { Log } from './Log';
+import { AddButton } from './AddButton';
+import { Filter } from './Filter';
 
 export function FilterSetsPage() {
   const { filterSets, addFilterSet, editFilterSet } = useFilterSets();
@@ -41,7 +43,12 @@ export function FilterSetsPage() {
     setEditing(defaultFilterSet);
   }
   function handleEdit(): void {
-    if (!filterSets.length) addFilterSet(defaultFilterSet);
+    if (!filterSets.length) {
+      addFilterSet(defaultFilterSet);
+      setCurrentIndex(0); // not sure if necessary, test when delete implemented
+      setEditing(defaultFilterSet);
+      return;
+    }
     setEditing(filterSets[currentIndex]);
   }
   function handleSave(): void {
@@ -56,7 +63,7 @@ export function FilterSetsPage() {
           <div className="m-[30px] w-full max-w-[410px] overflow-y-scroll">
             {filterSets.map((value, index) => {
               return (
-                <LoggedFilterSet
+                <Log
                   key={index}
                   label={value.label}
                   isSelected={index === currentIndex}
@@ -122,8 +129,7 @@ export function FilterSetsPage() {
             Object.entries(
               editing || filterSets[currentIndex] || defaultFilterSet
             ).map(([key, value]) => {
-              //check to ensure boolean 'value' passed
-              if (key === 'label' || key === 'filterSetId') return;
+              if (typeof value !== 'boolean') return; // only filters render
               return (
                 <Filter
                   key={key}
@@ -137,93 +143,6 @@ export function FilterSetsPage() {
           }
         </div>
       </div>
-    </div>
-  );
-}
-
-type LoggedFilterSetProps = {
-  label: string; // whole set's label
-  isSelected: boolean;
-  onClick: () => void;
-  editing: FilterSet | UnsavedFilterSet | undefined;
-  onChange: (e: string) => void;
-};
-
-function LoggedFilterSet({
-  label,
-  isSelected,
-  onClick,
-  editing,
-  onChange,
-}: LoggedFilterSetProps) {
-  return (
-    <input
-      value={editing && isSelected ? editing.label : label}
-      onChange={(e) => onChange(e.currentTarget.value)}
-      className={`w-[calc(100%-30px)] text-black focus:outline-none mt-[1px] mb-[1px] pl-2 pr-2 select-none cursor-pointer ${
-        isSelected ? 'bg-myyellow' : 'bg-mywhite'
-      }`}
-      // allow editing (readOnly=false) if isSelected, editing are both truthy
-      readOnly={!(isSelected && editing)}
-      onClick={onClick}
-    />
-  );
-}
-
-type AddButtonProps = {
-  onClick: () => void;
-};
-
-function AddButton({ onClick }: AddButtonProps) {
-  return (
-    <div
-      onClick={onClick}
-      className="flex absolute w-[34px] h-[34px] rounded-[40px] bg-mygrey right-8 top-4 cursor-pointer">
-      <div className="relative flex justify-center items-center w-full h-full">
-        <div className="absolute bg-mywhite w-4 h-[3px] rounded-[40px]" />
-        <div className="absolute bg-mywhite h-4 w-[3px] rounded-[40px]" />
-      </div>
-    </div>
-  );
-}
-
-type FilterProps = {
-  name: string;
-  isEnabled: boolean;
-  editing: FilterSet | UnsavedFilterSet | undefined;
-  onClick: (key: string) => void;
-};
-
-function Filter({ name, isEnabled, onClick, editing }: FilterProps) {
-  const titleMappings: Record<string, string> = {
-    usSsn: 'US SSN',
-    usDriverLicense: "US Driver's License",
-    usBankNumber: 'US Bank Number',
-    dateTime: 'Date / Time',
-    ipAddress: 'IP Address',
-    creditCard: 'Credit Card',
-    crypto: 'Crypto Wallet',
-    location: 'Location',
-    emailAddress: 'Email Address',
-    phoneNumber: 'Phone Number',
-    person: 'Person',
-  };
-  const title = titleMappings[name];
-  return (
-    <div className="flex max-w-[410px] w-[calc(50%-6.5vw)] justify-end mr-[6.5vw]  sm:w-[calc(50%-55px)] sm:mr-[55px]">
-      <label
-        onClick={() => onClick(name)}
-        className="flex items-center justify-end text-[13px] flex-wrap cursor-pointer sm:flex-nowrap">
-        <span className="w-full justify-end mr-[5px] flex whitespace-nowrap">
-          {title}
-        </span>
-        <Switch
-          checked={editing ? editing[name] : isEnabled}
-          onClick={() => onClick(name)}
-          onChange={() => {}} // requires onChange, though only works right when the function is passed to onClick -> so giving it a nothing fn
-          className="react-switch"
-        />
-      </label>
     </div>
   );
 }

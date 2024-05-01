@@ -1,11 +1,11 @@
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { Header } from './components/Header';
-import { HomePage } from './pages/HomePage';
-import { FilterSetsPage } from './pages/FilterSetsPage';
-import { AboutPage } from './pages/AboutPage';
-import { SupportPage } from './pages/SupportPage';
-import { SignUpPage } from './pages/SignUpPage';
+import { HomePage } from './pages/HomePage/HomePage';
+import { FilterSetsPage } from './pages/FilterSetsPage/FilterSetsPage';
+import { AboutPage } from './pages/AboutPage/AboutPage';
+import { SupportPage } from './pages/SupportPage/SupportPage';
+import { SignUpPage } from './pages/SignUpPage/SignUpPage';
 import { useEffect, useState } from 'react';
 import {
   FilterSet,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, Fragment } from 'react';
-import { Message } from '../lib/data';
+import { Message } from '../../lib/data';
 
 type DisplayProps = {
   mailbox: Message[];

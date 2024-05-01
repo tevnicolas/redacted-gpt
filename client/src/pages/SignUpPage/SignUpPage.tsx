@@ -1,5 +1,5 @@
-import { UserPassEntry } from '../components/LogIn';
-import { Button } from '../components/Button';
+import { UserPassEntry } from '../../components/LogIn';
+import { Button } from '../../components/Button';
 
 export function SignUpPage() {
   return (
