@@ -1,6 +1,6 @@
-import { UnsavedFilterSet } from './data';
+import { SessionFilterSet } from 'shared/types';
 
-export const defaultFilterSet: UnsavedFilterSet = {
+export const defaultFilterSet: SessionFilterSet = {
   label: '',
   person: false,
   phoneNumber: false,

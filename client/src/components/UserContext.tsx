@@ -1,6 +1,7 @@
 import { createContext } from 'react';
 
 export type User = {
+  // type is different than on backend, double check later
   userId: number;
   username: string;
 };

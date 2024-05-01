@@ -1,21 +1,18 @@
 import { createContext } from 'react';
-import { FilterSet, UnsavedFilterSet } from '../lib/data';
+import { FilterSet } from 'shared/types';
 
 export type FilterSetsContextType = {
-  filterSets: FilterSet[] | UnsavedFilterSet[];
-  addFilterSet: (filterSet: FilterSet | UnsavedFilterSet) => void;
-  editFilterSet: (
-    filterSet: FilterSet | UnsavedFilterSet | undefined,
-    index: number
-  ) => void;
-  // deleteFilterSet: (filterSet: FilterSet) => void;
+  filterSets: FilterSet[];
+  addFilterSet: (filterSet: FilterSet) => void;
+  commitFilterSetEdits: (filterSet: FilterSet, index: number) => void;
+  deleteFilterSet: (index: number) => void;
 };
 
 export const FilterSetsContext = createContext<FilterSetsContextType>({
   filterSets: [],
   addFilterSet: () => undefined,
-  editFilterSet: () => undefined,
-  // deleteFilterSet: () => undefined,
+  commitFilterSetEdits: () => undefined,
+  deleteFilterSet: () => undefined,
 });
 
 export const FilterSetsProvider = FilterSetsContext.Provider;
