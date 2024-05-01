@@ -13,12 +13,12 @@ import {
   authMiddleware,
 } from './lib/index.js';
 import { nextTick } from 'node:process';
-import { FilterSet } from '../client/src/lib/data.js';
 import {
   createAnalysisRun,
   getAnalysisResponse,
   startAnalysisThread,
 } from './lib/openai-service.js';
+import { AccountFilterSet } from '../shared/types';
 
 const exec = promisify(nodeExec);
 
@@ -109,7 +109,7 @@ app.get('/api/filter-sets', authMiddleware, async (req, res, next) => {
         where "userId" = $1
         order by "filterSetId" desc;
     `;
-    const result = await db.query<FilterSet>(sql, [req.user?.userId]);
+    const result = await db.query<AccountFilterSet>(sql, [req.user?.userId]);
     const filterSets = result.rows;
     res.status(200).json(filterSets);
   } catch (error) {
@@ -159,7 +159,7 @@ app.post('/api/filter-sets', authMiddleware, async (req, res, next) => {
       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       returning *;
     `;
-    const result = await db.query<FilterSet>(sql, params);
+    const result = await db.query<AccountFilterSet>(sql, params);
     const filterSet = result.rows[0];
     res.status(201).json(filterSet);
   } catch (error) {
@@ -227,7 +227,7 @@ app.put(
         where "filterSetId" = $13 AND "userId" = $14
         returning *;
       `;
-      const results = await db.query<FilterSet>(sql, params);
+      const results = await db.query<AccountFilterSet>(sql, params);
       const updatedFilterSet = results.rows[0];
       if (!updatedFilterSet) {
         throw new ClientError(
@@ -255,7 +255,7 @@ app.delete(
         where "filterSetId" = $1 and "userId" = $2
         returning *;
       `;
-      const results = await db.query<FilterSet>(sql, params);
+      const results = await db.query<AccountFilterSet>(sql, params);
       const deleteFilterSet = results.rows[0];
       if (!deleteFilterSet) {
         throw new ClientError(

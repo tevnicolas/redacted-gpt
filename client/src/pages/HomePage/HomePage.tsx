@@ -3,15 +3,20 @@ import { SelectFilterSet } from './SelectFilterSet';
 import { WriteBox } from './WriteBox';
 import { RedactOrPrompt } from './RedactOrPrompt';
 import { Display } from './Display';
-import { presidioRedaction, promptChatGPT } from '../../lib/data';
+import { presidioRedaction, promptChatGPT } from '../../lib/api-calls';
 import {
   ReqInProgressError,
   validateSubmission,
   ValidationError,
   reqInProgressCheck,
 } from '../../lib/errors-checks';
-import { Message } from '../../lib/data';
 import { useError } from '../../components/useError';
+
+export type Message = {
+  id: number;
+  text: string;
+  sender: 'user' | 'ai' | 'security';
+};
 
 export function HomePage() {
   const { error, setError } = useError();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFilterSets } from '../../components/useFilterSets';
-import { FilterSet, UnsavedFilterSet } from '../../lib/data';
+import { FilterSet } from 'shared/types';
 import { defaultFilterSet } from '../../lib/default-filter-set';
 import { Button } from '../../components/Button';
 import { Log } from './Log';
@@ -8,11 +8,9 @@ import { AddButton } from './AddButton';
 import { Filter } from './Filter';
 
 export function FilterSetsPage() {
-  const { filterSets, addFilterSet, editFilterSet } = useFilterSets();
+  const { filterSets, addFilterSet, commitFilterSetEdits } = useFilterSets();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [editing, setEditing] = useState<
-    FilterSet | UnsavedFilterSet | undefined
-  >();
+  const [editing, setEditing] = useState<FilterSet | undefined>();
 
   function handleLabelChange(labelValue: string): void {
     if (!editing) return;
@@ -28,9 +26,9 @@ export function FilterSetsPage() {
   }
 
   function handleFilterChange(key: string): void {
-    if (!editing) return;
+    if (!editing) return; // revisit, maybe should start editing if no sets
     setEditing((prev) => {
-      if (!prev) return; // should never happen
+      if (!prev) return; // clarifies prev type will be defined
       return {
         ...prev,
         [key]: !prev[key],
@@ -39,22 +37,36 @@ export function FilterSetsPage() {
   }
 
   function handleAdd(): void {
+    if (editing) return; // while editing, don't enable adding new filter sets
     addFilterSet(defaultFilterSet);
+    setCurrentIndex(0);
     setEditing(defaultFilterSet);
   }
+
   function handleEdit(): void {
     if (!filterSets.length) {
       addFilterSet(defaultFilterSet);
-      setCurrentIndex(0); // not sure if necessary, test when delete implemented
+      setCurrentIndex(0);
       setEditing(defaultFilterSet);
       return;
     }
     setEditing(filterSets[currentIndex]);
   }
+
   function handleSave(): void {
-    editFilterSet(editing, currentIndex);
+    if (!editing) return; // clarifies argument type for commitFilterSetEdits
+    commitFilterSetEdits(editing, currentIndex);
     setEditing(undefined);
   }
+
+  function handleSelect(index: number): void {
+    if (editing) setEditing(undefined);
+    setCurrentIndex(index);
+  }
+
+  // function handleDelete(): void {
+
+  // }
 
   return (
     <div className="flex flex-wrap justify-center">
@@ -67,10 +79,7 @@ export function FilterSetsPage() {
                   key={index}
                   label={value.label}
                   isSelected={index === currentIndex}
-                  onClick={() => {
-                    if (editing) return; // Don't select another while editing
-                    setCurrentIndex(index);
-                  }}
+                  onClick={() => handleSelect(index)}
                   editing={editing}
                   onChange={handleLabelChange}
                 />
@@ -125,7 +134,7 @@ export function FilterSetsPage() {
       <div className="flex justify-center w-full">
         <div className="flex flex-wrap w-[50vw] h-[294px] max-w-[410px]">
           {
-            // Will render first from editing (if editing), or currentSet (if at least 1 filterSet), or defaultSet if first two conditions fail
+            // Will first try rendering from editing (if editing), or next the current set (if one exists), or default set if both conditions fail
             Object.entries(
               editing || filterSets[currentIndex] || defaultFilterSet
             ).map(([key, value]) => {

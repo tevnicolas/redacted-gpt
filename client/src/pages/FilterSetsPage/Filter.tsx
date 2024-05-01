@@ -1,11 +1,11 @@
 import Switch from 'react-switch';
-import { FilterSet, UnsavedFilterSet } from '../../lib/data';
+import { FilterSet } from 'shared/types';
 import { titleMappings } from '../../lib/title-mappings';
 
 type FilterProps = {
   name: string;
   isEnabled: boolean;
-  editing: FilterSet | UnsavedFilterSet | undefined;
+  editing: FilterSet | undefined;
   onClick: (key: string) => void;
 };
 

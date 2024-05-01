@@ -60,20 +60,28 @@ export function SelectFilterSet({
 
         {
           // Filter Sets selectable
-          filterSets.map((set) => {
+          filterSets.map((set, index) => {
             let sumValues = ''; // will represent all filters enabled in a set
             Object.entries(set).forEach(([key, value]) => {
               if (typeof value !== 'boolean') return; // No non filter values
-              if (value) sumValues += valueMappings[key] + ' '; // + true filters
+              if (value) sumValues += valueMappings[key] + ' '; // +true filters
             });
-            return <option value={sumValues}>{set.label}</option>;
+            return (
+              <option key={`${set.label}-${index}`} value={sumValues}>
+                {set.label}
+              </option>
+            );
           })
         }
         {
           // Default filters selectable
-          Object.keys(valueMappings).map((key) => {
+          Object.keys(valueMappings).map((key, index) => {
             return (
-              <option value={valueMappings[key]}>{titleMappings[key]}</option>
+              <option
+                key={`default-${titleMappings[key]}-${index}`}
+                value={valueMappings[key]}>
+                {titleMappings[key]}
+              </option>
             );
           })
         }

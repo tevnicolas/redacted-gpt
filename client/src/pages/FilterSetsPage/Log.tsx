@@ -1,10 +1,10 @@
-import { FilterSet, UnsavedFilterSet } from '../../lib/data';
+import { FilterSet } from 'shared/types';
 
 type LogProps = {
   label: string; // whole set's label
   isSelected: boolean;
   onClick: () => void;
-  editing: FilterSet | UnsavedFilterSet | undefined;
+  editing: FilterSet | undefined;
   onChange: (e: string) => void;
 };
 

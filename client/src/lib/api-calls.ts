@@ -1,66 +1,5 @@
-// import { createContext } from 'react';
-
+import { AccountFilterSet } from 'shared/types';
 import { UnauthorizedError } from './errors-checks';
-
-export type UnsavedFilterSet = {
-  label: string;
-  person: boolean;
-  phoneNumber: boolean;
-  emailAddress: boolean;
-  dateTime: boolean;
-  location: boolean;
-  usSsn: boolean;
-  usDriverLicense: boolean;
-  crypto: boolean;
-  usBankNumber: boolean;
-  creditCard: boolean;
-  ipAddress: boolean;
-};
-
-export type FilterSet = UnsavedFilterSet & {
-  filterSetId: number;
-};
-
-export type Message = {
-  id: number;
-  text: string;
-  sender: 'user' | 'ai' | 'security';
-};
-
-// const filterSets = createContext<FilterSet[]>([
-//   {
-//     filterSetId: 1,
-//     label: 'first',
-//     person: true,
-//     phoneNumber: true,
-//     emailAddress: true,
-//     dateTime: true,
-//     location: true,
-//     usSsn: true,
-//     usDriverLicense: true,
-//     crypto: true,
-//     usBankNumber: true,
-//     creditCard: true,
-//     ipAddress: true,
-//   },
-//   {
-//     filterSetId: 2,
-//     label: 'second',
-//     person: false,
-//     phoneNumber: true,
-//     emailAddress: false,
-//     dateTime: false,
-//     location: false,
-//     usSsn: false,
-//     usDriverLicense: false,
-//     crypto: false,
-//     usBankNumber: false,
-//     creditCard: false,
-//     ipAddress: false,
-//   },
-// ]);
-
-// console.log('filterSets', filterSets);
 
 export const tokenKey = 'um.token';
 
@@ -77,7 +16,9 @@ export function readToken(): string | undefined {
   return token !== null ? token : undefined; // transform null to undefined
 }
 
-export async function readAccountSets(token: string): Promise<FilterSet[]> {
+export async function readAccountSets(
+  token: string
+): Promise<AccountFilterSet[]> {
   const req = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -97,16 +38,16 @@ export async function readAccountSets(token: string): Promise<FilterSet[]> {
           );
     throw error;
   }
-  const filterSets: FilterSet[] = await res.json();
+  const filterSets: AccountFilterSet[] = await res.json();
   // Will be caught as unexpected error
   if (!filterSets) throw 'Data retrieval services are possibly down.';
   return filterSets;
 }
 
 export async function addAccountSet(
-  filterSet: FilterSet,
+  filterSet: AccountFilterSet,
   token: string
-): Promise<FilterSet> {
+): Promise<AccountFilterSet> {
   const res = await fetch('/api/filter-sets', {
     method: 'POST',
     headers: {

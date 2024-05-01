@@ -7,13 +7,7 @@ import { AboutPage } from './pages/AboutPage/AboutPage';
 import { SupportPage } from './pages/SupportPage/SupportPage';
 import { SignUpPage } from './pages/SignUpPage/SignUpPage';
 import { useEffect, useState } from 'react';
-import {
-  FilterSet,
-  UnsavedFilterSet,
-  readAccountSets,
-  readToken,
-  saveToken,
-} from './lib/data';
+import { readAccountSets, readToken, saveToken } from './lib/api-calls';
 import {
   FilterSetsContextType,
   FilterSetsProvider,
@@ -21,13 +15,12 @@ import {
 import { User, UserContextType, UserProvider } from './components/UserContext';
 import { UnauthorizedError } from './lib/errors-checks';
 import { ErrorContextType, ErrorProvider } from './components/ErrorContext';
+import { FilterSet } from 'shared/types';
 
 export default function App() {
   const [user, setUser] = useState<User>();
   const [token, setToken] = useState<string | undefined>(readToken());
-  const [filterSets, setFilterSets] = useState<
-    FilterSet[] | UnsavedFilterSet[]
-  >([]);
+  const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
   const [error, setError] = useState<unknown>();
 
   function handleSignIn(user: User, token: string) {
@@ -42,7 +35,7 @@ export default function App() {
     saveToken(undefined);
   }
 
-  function addFilterSet(filterSet: FilterSet | UnsavedFilterSet) {
+  function addFilterSet(filterSet: FilterSet) {
     // important to create a variable, so that sessionStorage will be updated synchronously
     const newFilterSets = [filterSet, ...filterSets];
     setFilterSets(newFilterSets);
@@ -50,13 +43,17 @@ export default function App() {
     sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
   }
 
-  function editFilterSet(
-    filterSet: FilterSet | UnsavedFilterSet | undefined,
-    index: number
-  ) {
+  function commitFilterSetEdits(filterSet: FilterSet, index: number) {
     if (!filterSet) return;
     const newFilterSets = [...filterSets];
     newFilterSets[index] = filterSet;
+    setFilterSets(newFilterSets);
+    sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
+  }
+
+  function deleteFilterSet(index: number) {
+    const newFilterSets = [...filterSets];
+    newFilterSets.splice(index, 1);
     setFilterSets(newFilterSets);
     sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
   }
@@ -93,7 +90,8 @@ export default function App() {
   const filterSetsContextValues: FilterSetsContextType = {
     filterSets,
     addFilterSet,
-    editFilterSet,
+    commitFilterSetEdits,
+    deleteFilterSet,
   };
 
   return (
