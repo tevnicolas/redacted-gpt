@@ -8,15 +8,16 @@ import { AddButton } from './AddButton';
 import { Filter } from './Filter';
 
 export function FilterSetsPage() {
-  const { filterSets, addFilterSet, commitFilterSetEdits } = useFilterSets();
+  const { filterSets, addFilterSet, commitFilterSetEdits, deleteFilterSet } =
+    useFilterSets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [editing, setEditing] = useState<FilterSet | undefined>();
 
   function handleLabelChange(labelValue: string): void {
     if (!editing) return;
-    if (labelValue === undefined) return; // should never happen
+    if (labelValue === undefined) return;
     setEditing((prev) => {
-      if (!prev) return; // should never happen
+      if (!prev) return; // clarifies prev type; will be defined
       return {
         ...prev,
         ['label']: labelValue,
@@ -28,7 +29,7 @@ export function FilterSetsPage() {
   function handleFilterChange(key: string): void {
     if (!editing) return; // revisit, maybe should start editing if no sets
     setEditing((prev) => {
-      if (!prev) return; // clarifies prev type will be defined
+      if (!prev) return; // clarifies prev type; will be defined
       return {
         ...prev,
         [key]: !prev[key],
@@ -54,7 +55,7 @@ export function FilterSetsPage() {
   }
 
   function handleSave(): void {
-    if (!editing) return; // clarifies argument type for commitFilterSetEdits
+    if (!editing) return; // clarifies arg type for commitFilterSetEdits
     commitFilterSetEdits(editing, currentIndex);
     setEditing(undefined);
   }
@@ -64,9 +65,12 @@ export function FilterSetsPage() {
     setCurrentIndex(index);
   }
 
-  // function handleDelete(): void {
-
-  // }
+  function handleDelete(): void {
+    if (!editing) return;
+    deleteFilterSet(currentIndex);
+    setCurrentIndex(currentIndex - 1);
+    setEditing(undefined);
+  }
 
   return (
     <div className="flex flex-wrap justify-center">
@@ -116,6 +120,7 @@ export function FilterSetsPage() {
                   type="button"
                   text="Delete"
                   className="bg-mygrey text-[13px] max-w-[55px]"
+                  onClick={handleDelete}
                 />
               </div>
             </>
