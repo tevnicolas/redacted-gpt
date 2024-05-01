@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFilterSets } from '../../components/useFilterSets';
 import { FilterSet } from 'shared/types';
-import { defaultFilterSet } from '../../lib/default-filter-set';
+import {
+  defaultFilterSet,
+  isDefaultFilterSet,
+} from '../../lib/default-filter-set';
 import { Button } from '../../components/Button';
 import { Log } from './Log';
 import { AddButton } from './AddButton';
@@ -12,6 +15,18 @@ export function FilterSetsPage() {
     useFilterSets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [editing, setEditing] = useState<FilterSet | undefined>();
+  const shouldAddAfterSave = useRef(false);
+
+  // This useEffect allows adding filters while editing is enabled. Prevents
+  // race conditions between state renders.
+  useEffect(() => {
+    if (shouldAddAfterSave.current) {
+      addFilterSet(defaultFilterSet);
+      setCurrentIndex(0);
+      setEditing(defaultFilterSet);
+      shouldAddAfterSave.current = false;
+    }
+  }, [shouldAddAfterSave, addFilterSet]);
 
   function handleLabelChange(labelValue: string): void {
     if (!editing) return;
@@ -27,7 +42,10 @@ export function FilterSetsPage() {
   }
 
   function handleFilterChange(key: string): void {
-    if (!editing) return; // revisit, maybe should start editing if no sets
+    // when not editing, and while there's logged sets, filter changes disabled
+    if (!editing && filterSets.length) return;
+    // while not editing, and nothing is saved, changing filter creates new set
+    if (!editing) handleEdit();
     setEditing((prev) => {
       if (!prev) return; // clarifies prev type; will be defined
       return {
@@ -38,10 +56,27 @@ export function FilterSetsPage() {
   }
 
   function handleAdd(): void {
-    if (editing) return; // while editing, don't enable adding new filter sets
-    addFilterSet(defaultFilterSet);
-    setCurrentIndex(0);
-    setEditing(defaultFilterSet);
+    if (editing) {
+      shouldAddAfterSave.current = true;
+      if (isDefaultFilterSet(editing)) {
+        deleteFilterSet(currentIndex);
+        currentIndex ? setCurrentIndex(currentIndex - 1) : setCurrentIndex(0);
+      } else {
+        commitFilterSetEdits(editing, currentIndex);
+      }
+    } else {
+      addFilterSet(defaultFilterSet);
+      setCurrentIndex(0);
+      setEditing(defaultFilterSet);
+    }
+  }
+
+  function handleSelect(index: number): void {
+    // if (editing) {
+    //   commitFilterSetEdits(editing, currentIndex);
+    // }
+    if (editing) return; // implement selecting while editing later
+    setCurrentIndex(index);
   }
 
   function handleEdit(): void {
@@ -55,20 +90,29 @@ export function FilterSetsPage() {
   }
 
   function handleSave(): void {
-    if (!editing) return; // clarifies arg type for commitFilterSetEdits
-    commitFilterSetEdits(editing, currentIndex);
+    if (!editing) return;
+    if (isDefaultFilterSet(editing)) {
+      handleDelete();
+    } else {
+      commitFilterSetEdits(editing, currentIndex);
+    }
     setEditing(undefined);
   }
 
-  function handleSelect(index: number): void {
-    if (editing) setEditing(undefined);
-    setCurrentIndex(index);
+  function handleRevert(): void {
+    if (!editing) return; // clarifies type; will be defined
+    if (isDefaultFilterSet(filterSets[currentIndex])) {
+      handleDelete();
+    } else {
+      setEditing(undefined);
+    }
+    setEditing(undefined);
   }
 
   function handleDelete(): void {
     if (!editing) return;
     deleteFilterSet(currentIndex);
-    setCurrentIndex(currentIndex - 1);
+    currentIndex ? setCurrentIndex(currentIndex - 1) : setCurrentIndex(0);
     setEditing(undefined);
   }
 
@@ -110,9 +154,7 @@ export function FilterSetsPage() {
                   type="button"
                   text="Revert"
                   className="bg-mygrey text-[13px] max-w-[55px]"
-                  onClick={() => {
-                    setEditing(undefined);
-                  }}
+                  onClick={handleRevert}
                 />
               </div>
               <div className="flex w-full justify-start">
