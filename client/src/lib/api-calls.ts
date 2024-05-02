@@ -1,4 +1,4 @@
-import { AccountFilterSet } from 'shared/types';
+import { AccountFilterSet, SessionFilterSet } from 'shared/types';
 import { UnauthorizedError } from './errors-checks';
 
 export const tokenKey = 'um.token';
@@ -45,7 +45,7 @@ export async function readAccountSets(
 }
 
 export async function addAccountSet(
-  filterSet: AccountFilterSet,
+  filterSet: SessionFilterSet,
   token: string
 ): Promise<AccountFilterSet> {
   const res = await fetch('/api/filter-sets', {

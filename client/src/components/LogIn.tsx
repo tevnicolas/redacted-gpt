@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './Button';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { FadeInWrapper } from './FadeInWrapper';
+import { useUser } from './useUser';
 
 type LogInProps = {
   status: boolean;
@@ -10,11 +11,42 @@ type LogInProps = {
 };
 
 export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
+  const { handleSignIn, handleSignOut, user } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<unknown>();
+  const navigate = useNavigate();
   const [hoverToggle, setHoverToggle] = useState(false);
   const hoverStyle = hoverToggle ? 'hover:bg-myyellow' : 'hover:bg-mywhite';
   useEffect(() => {
     setHoverToggle((prev) => !prev);
   }, [loginDropdown]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      setIsLoading(true);
+      const formData = new FormData(event.currentTarget);
+      const userData = Object.fromEntries(formData);
+      const req = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      };
+      const res = await fetch('/api/auth/sign-in', req);
+      if (!res.ok) {
+        throw new Error(`fetch Error ${res.status}`);
+      }
+      const { user, token } = await res.json();
+      handleSignIn(user, token);
+      console.log('Signed In', user);
+      console.log('Received token:', token);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <>
       <div
@@ -33,16 +65,35 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
         <FadeInWrapper className="flex flex-wrap justify-end absolute top-[80px] w-[200px] right-[49px] [@media(width<=767px)]:right-[108px] [@media(width<=335px)]:left-[20px] z-10">
           <Triangle />
           <div className="bg-mywhite rounded-[18px] w-full">
-            <form className="m-[15px]">
-              <UserPassEntry type="user" size={11} />
-              <UserPassEntry type="password" size={11} />
-              <div className="flex justify-between m-[10px]">
-                <Button text="Login" />
-                <Link to="/sign-up">
-                  <Button type="button" text="Sign Up" />
-                </Link>
-              </div>
-              <p>error</p>
+            <form className="m-[15px]" onSubmit={handleSubmit}>
+              {!user ? (
+                <>
+                  <UserPassEntry type="user" size={11} />
+                  <UserPassEntry type="password" size={11} />
+                  <div className="flex justify-between m-[10px]">
+                    <Button text="Login" />
+                    <Link to="/sign-up">
+                      <Button
+                        type="button"
+                        text="Sign Up"
+                        disabled={isLoading}
+                        onClick={() => navigate('/sign-up')}
+                      />
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>{user.username}</p>
+                  <Button
+                    type="button"
+                    text="Sign Out"
+                    disabled={isLoading}
+                    onClick={handleSignOut}
+                  />
+                </>
+              )}
+              <p>{`${error}`}</p>
             </form>
           </div>
         </FadeInWrapper>
@@ -65,6 +116,7 @@ export function UserPassEntry({ type, size }: UserPassEntryProps) {
         </p>
       </div>
       <input
+        name={type === 'user' ? 'username' : 'password'}
         type={type === 'user' ? 'text' : 'password'}
         size={size}
         className="bg-myconcrete pl-1 pr-1 max-h-[22px]"

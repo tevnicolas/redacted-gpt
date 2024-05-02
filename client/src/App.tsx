@@ -7,7 +7,12 @@ import { AboutPage } from './pages/AboutPage/AboutPage';
 import { SupportPage } from './pages/SupportPage/SupportPage';
 import { SignUpPage } from './pages/SignUpPage/SignUpPage';
 import { useEffect, useState } from 'react';
-import { readAccountSets, readToken, saveToken } from './lib/api-calls';
+import {
+  addAccountSet,
+  readAccountSets,
+  readToken,
+  saveToken,
+} from './lib/api-calls';
 import {
   FilterSetsContextType,
   FilterSetsProvider,
@@ -15,7 +20,7 @@ import {
 import { User, UserContextType, UserProvider } from './components/UserContext';
 import { UnauthorizedError } from './lib/errors-checks';
 import { ErrorContextType, ErrorProvider } from './components/ErrorContext';
-import { FilterSet } from 'shared/types';
+import { FilterSet, SessionFilterSet } from 'shared/types';
 
 export default function App() {
   const [user, setUser] = useState<User>();
@@ -35,12 +40,25 @@ export default function App() {
     saveToken(undefined);
   }
 
-  function addFilterSet(filterSet: FilterSet) {
-    // important to create a variable, so that sessionStorage will be updated synchronously
-    const newFilterSets = [filterSet, ...filterSets];
-    setFilterSets(newFilterSets);
-    // important to keep this code rewritten at the end of each action fn, as putting it in a useEffect with filterSets as a dependency creates a race condition with loadFilterSets().
-    sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
+  async function addFilterSet(filterSet: SessionFilterSet) {
+    try {
+      if (!token) {
+        // important to create a variable, so that sessionStorage will be updated synchronously
+        const newFilterSets = [filterSet, ...filterSets];
+        setFilterSets(newFilterSets);
+        // important to keep this code rewritten at the end of each action fn, as putting it in a useEffect with filterSets as a dependency creates a race condition with loadFilterSets().
+        sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
+      } else {
+        const accountSet = await addAccountSet(filterSet, token);
+        const newFilterSets = [accountSet, ...filterSets];
+        setFilterSets(newFilterSets);
+      }
+    } catch (error) {
+      setError(error);
+      if (error instanceof UnauthorizedError) {
+        handleSignOut();
+      }
+    }
   }
 
   function commitFilterSetEdits(filterSet: FilterSet, index: number) {

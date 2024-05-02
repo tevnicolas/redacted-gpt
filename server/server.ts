@@ -22,11 +22,12 @@ import { AccountFilterSet } from '../shared/types';
 
 const exec = promisify(nodeExec);
 
-type User = {
-  userId: number;
-  username: string;
-  passwordHash: string;
-};
+// type User = {
+//   userId: number;
+//   username: string;
+//   passwordHash: string;
+// };
+
 type Auth = {
   username: string;
   password: string;
