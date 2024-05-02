@@ -105,10 +105,10 @@ app.post('/api/auth/sign-in', async (req, res, next) => {
 app.get('/api/filter-sets', authMiddleware, async (req, res, next) => {
   try {
     const sql = `
-      select *
+      select "filterSetId", "label", "userId", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn", "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress"
         from "filterSets"
         where "userId" = $1
-        order by "filterSetId" desc;
+        order by "modifiedAt" desc;
     `;
     const result = await db.query<AccountFilterSet>(sql, [req.user?.userId]);
     const filterSets = result.rows;
@@ -158,7 +158,8 @@ app.post('/api/filter-sets', authMiddleware, async (req, res, next) => {
         ("label", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn",
         "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress", "userId")
       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      returning *;
+      returning
+        "filterSetId", "label", "userId", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn", "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress";
     `;
     const result = await db.query<AccountFilterSet>(sql, params);
     const filterSet = result.rows[0];
@@ -226,7 +227,8 @@ app.put(
             "usSsn" = $7, "usDriverLicense" = $8, "crypto" = $9,
             "usBankNumber" = $10, "creditCard" = $11, "ipAddress" = $12
         where "filterSetId" = $13 AND "userId" = $14
-        returning *;
+        returning
+          "filterSetId", "label", "userId", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn", "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress";
       `;
       const results = await db.query<AccountFilterSet>(sql, params);
       const updatedFilterSet = results.rows[0];
@@ -254,7 +256,8 @@ app.delete(
       const sql = `
       delete from "filterSets"
         where "filterSetId" = $1 and "userId" = $2
-        returning *;
+        returning
+          "filterSetId", "label", "userId", "person", "phoneNumber", "emailAddress", "dateTime", "location", "usSsn", "usDriverLicense", "crypto", "usBankNumber", "creditCard", "ipAddress";
       `;
       const results = await db.query<AccountFilterSet>(sql, params);
       const deleteFilterSet = results.rows[0];

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useFilterSets } from '../../components/useFilterSets';
 import { FilterSet } from 'shared/types';
 import {
@@ -13,20 +13,8 @@ import { Filter } from './Filter';
 export function FilterSetsPage() {
   const { filterSets, addFilterSet, commitFilterSetEdits, deleteFilterSet } =
     useFilterSets();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<number | undefined>();
   const [editing, setEditing] = useState<FilterSet | undefined>();
-  const shouldAddAfterSave = useRef(false);
-
-  // This useEffect allows adding filters while editing is enabled. Prevents
-  // race conditions between state renders.
-  useEffect(() => {
-    if (shouldAddAfterSave.current) {
-      addFilterSet(defaultFilterSet);
-      setCurrentIndex(0);
-      setEditing(defaultFilterSet);
-      shouldAddAfterSave.current = false;
-    }
-  }, [shouldAddAfterSave, addFilterSet]);
 
   function handleLabelChange(labelValue: string): void {
     if (!editing) return;
@@ -56,63 +44,60 @@ export function FilterSetsPage() {
   }
 
   function handleAdd(): void {
-    if (editing) {
-      shouldAddAfterSave.current = true;
-      if (isDefaultFilterSet(editing)) {
-        deleteFilterSet(currentIndex);
-        currentIndex ? setCurrentIndex(currentIndex - 1) : setCurrentIndex(0);
-      } else {
-        commitFilterSetEdits(editing, currentIndex);
-      }
-    } else {
-      addFilterSet(defaultFilterSet);
-      setCurrentIndex(0);
-      setEditing(defaultFilterSet);
-    }
+    setCurrentIndex(undefined);
+    setEditing(defaultFilterSet);
   }
 
   function handleSelect(index: number): void {
-    // if (editing) {
-    //   commitFilterSetEdits(editing, currentIndex);
-    // }
-    if (editing) return; // implement selecting while editing later
+    if (editing) return;
     setCurrentIndex(index);
   }
 
   function handleEdit(): void {
-    if (!filterSets.length) {
-      addFilterSet(defaultFilterSet);
-      setCurrentIndex(0);
+    if (currentIndex !== undefined) {
+      setEditing(filterSets[currentIndex]);
+    } else {
       setEditing(defaultFilterSet);
-      return;
     }
-    setEditing(filterSets[currentIndex]);
   }
 
   function handleSave(): void {
-    if (!editing) return;
-    if (isDefaultFilterSet(editing)) {
-      handleDelete();
+    if (!editing) return; // clarifies type; is defined
+    if (currentIndex !== undefined) {
+      if (isDefaultFilterSet(editing)) {
+        deleteFilterSet(currentIndex);
+      } else {
+        commitFilterSetEdits(editing, currentIndex);
+      }
+      setCurrentIndex(0);
     } else {
-      commitFilterSetEdits(editing, currentIndex);
+      if (isDefaultFilterSet(editing)) {
+        // No action needed
+      } else {
+        addFilterSet(editing);
+        setCurrentIndex(0);
+      }
     }
     setEditing(undefined);
   }
 
   function handleRevert(): void {
-    if (!editing) return; // clarifies type; will be defined
-    if (isDefaultFilterSet(filterSets[currentIndex])) {
-      handleDelete();
-    } else {
-      setEditing(undefined);
-    }
+    if (!editing) return; // clarifies type; is defined
     setEditing(undefined);
   }
 
   function handleDelete(): void {
     if (!editing) return;
-    deleteFilterSet(currentIndex);
-    currentIndex ? setCurrentIndex(currentIndex - 1) : setCurrentIndex(0);
+    if (currentIndex !== undefined) {
+      deleteFilterSet(currentIndex);
+      if (filterSets.length) {
+        currentIndex // is greater than 0
+          ? setCurrentIndex(currentIndex - 1)
+          : setCurrentIndex(0);
+      } else {
+        setCurrentIndex(undefined);
+      }
+    }
     setEditing(undefined);
   }
 
@@ -121,6 +106,16 @@ export function FilterSetsPage() {
       <div className="flex justify-center w-full">
         <div className="flex relative justify-center bg-mywhite rounded-[40px] w-[50vw] h-[294px] max-w-[410px]">
           <div className="m-[30px] w-full max-w-[410px] overflow-y-scroll">
+            {editing && currentIndex === undefined && (
+              <Log
+                key={'editing'}
+                label={editing.label}
+                isSelected={true}
+                onClick={() => {}}
+                editing={editing}
+                onChange={handleLabelChange}
+              />
+            )}
             {filterSets.map((value, index) => {
               return (
                 <Log
@@ -181,9 +176,11 @@ export function FilterSetsPage() {
       <div className="flex justify-center w-full">
         <div className="flex flex-wrap w-[50vw] h-[294px] max-w-[410px]">
           {
-            // Will first try rendering from editing (if editing), or next the current set (if one exists), or default set if both conditions fail
+            // Will first try rendering from editing (if editing), or next the current set (if at least one has currently been saved), or default set if those conditions fail
             Object.entries(
-              editing || filterSets[currentIndex] || defaultFilterSet
+              editing ||
+                (currentIndex !== undefined && filterSets[currentIndex]) ||
+                defaultFilterSet
             ).map(([key, value]) => {
               if (typeof value !== 'boolean') return; // only filters render
               return (

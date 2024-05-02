@@ -64,7 +64,8 @@ export default function App() {
   function commitFilterSetEdits(filterSet: FilterSet, index: number) {
     if (!filterSet) return;
     const newFilterSets = [...filterSets];
-    newFilterSets[index] = filterSet;
+    newFilterSets.splice(index, 1);
+    newFilterSets.unshift(filterSet);
     setFilterSets(newFilterSets);
     sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
   }
