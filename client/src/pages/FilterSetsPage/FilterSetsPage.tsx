@@ -44,13 +44,16 @@ export function FilterSetsPage() {
   }
 
   function handleAdd(): void {
+    if (currentIndex === undefined) {
+      handleSave();
+    }
     setCurrentIndex(undefined);
     setEditing(defaultFilterSet);
   }
 
   function handleSelect(index: number): void {
-    if (editing) return;
     setCurrentIndex(index);
+    if (editing) setEditing(filterSets[index]);
   }
 
   function handleEdit(): void {
@@ -63,16 +66,24 @@ export function FilterSetsPage() {
 
   function handleSave(): void {
     if (!editing) return; // clarifies type; is defined
+    if (currentIndex === undefined && filterSets.length) {
+      setCurrentIndex(0);
+    }
     if (currentIndex !== undefined) {
       if (isDefaultFilterSet(editing)) {
         deleteFilterSet(currentIndex);
+        if (filterSets.length > 1) {
+          setCurrentIndex(0);
+        } else {
+          setCurrentIndex(undefined);
+        }
       } else {
         commitFilterSetEdits(editing, currentIndex);
+        setCurrentIndex(0);
       }
-      setCurrentIndex(0);
     } else {
       if (isDefaultFilterSet(editing)) {
-        // No action needed
+        // No action needed, keep currentIndex undefined
       } else {
         addFilterSet(editing);
         setCurrentIndex(0);
@@ -83,18 +94,25 @@ export function FilterSetsPage() {
 
   function handleRevert(): void {
     if (!editing) return; // clarifies type; is defined
+    if (currentIndex === undefined && filterSets.length) {
+      setCurrentIndex(0);
+    }
     setEditing(undefined);
   }
 
   function handleDelete(): void {
     if (!editing) return;
+    if (currentIndex === undefined && filterSets.length) {
+      setCurrentIndex(0);
+    }
     if (currentIndex !== undefined) {
       deleteFilterSet(currentIndex);
-      if (filterSets.length) {
+      if (filterSets.length > 1) {
         currentIndex // is greater than 0
           ? setCurrentIndex(currentIndex - 1)
           : setCurrentIndex(0);
       } else {
+        console.log('hello!');
         setCurrentIndex(undefined);
       }
     }
@@ -132,11 +150,11 @@ export function FilterSetsPage() {
           <AddButton onClick={handleAdd} />
         </div>
       </div>
-      <div className="flex w-full justify-center mt-[20px] mb-[40px]">
-        <div className="flex space-around w-[50vw] max-w-[410px]">
+      <div className="flex w-full justify-center mt-5 mb-10">
+        <div className="flex space-x-4 w-1/2 max-w-[410px] justify-between">
           {editing ? (
             <>
-              <div className="flex w-full justify-end">
+              <div className="flex w-full justify-end w-1/3">
                 <Button
                   type="button"
                   text="Save"
@@ -144,7 +162,7 @@ export function FilterSetsPage() {
                   onClick={handleSave}
                 />
               </div>
-              <div className="flex w-full justify-center">
+              <div className="flex w-full justify-center w-1/3">
                 <Button
                   type="button"
                   text="Revert"
@@ -152,7 +170,7 @@ export function FilterSetsPage() {
                   onClick={handleRevert}
                 />
               </div>
-              <div className="flex w-full justify-start">
+              <div className="flex w-full justify-start w-1/3">
                 <Button
                   type="button"
                   text="Delete"
@@ -162,13 +180,15 @@ export function FilterSetsPage() {
               </div>
             </>
           ) : (
-            <div className="flex w-full justify-start">
-              <Button
-                type="button"
-                text="Edit"
-                className="bg-mygrey text-[13px] max-w-[55px]"
-                onClick={handleEdit}
-              />
+            <div className="flex w-full justify-end w-full">
+              <div className="flex justify-start w-1/3">
+                <Button
+                  type="button"
+                  text="Edit"
+                  className="bg-mygrey text-[13px] max-w-[55px] ml-[11px]"
+                  onClick={handleEdit}
+                />
+              </div>
             </div>
           )}
         </div>

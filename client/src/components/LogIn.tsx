@@ -11,7 +11,7 @@ type LogInProps = {
 };
 
 export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
-  const { handleSignIn, handleSignOut, user } = useUser();
+  const { handleSignIn, handleSignOut, token } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown>();
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
           <Triangle />
           <div className="bg-mywhite rounded-[18px] w-full">
             <form className="m-[15px]" onSubmit={handleSubmit}>
-              {!user ? (
+              {!token ? (
                 <>
                   <UserPassEntry type="user" size={11} />
                   <UserPassEntry type="password" size={11} />
@@ -84,7 +84,7 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
                 </>
               ) : (
                 <>
-                  <p>{user.username}</p>
+                  {/* <p>{user?.userId}</p> put userId in local storage*/}
                   <Button
                     type="button"
                     text="Sign Out"
