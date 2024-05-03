@@ -3,23 +3,29 @@ import { Message } from './HomePage';
 
 type DisplayProps = {
   mailbox: Message[];
+  containerSize: number | undefined;
   isLoading: boolean;
   isRedacted: boolean;
 };
 /** Display shows user prompted (post-redaction, validated) messages and AI response messages, as well as temporary loading messages and confirmations; It will show the entirety of a single session's conversation */
-export function Display({ mailbox, isLoading, isRedacted }: DisplayProps) {
+export function Display({
+  mailbox,
+  containerSize,
+  isLoading,
+  isRedacted,
+}: DisplayProps) {
   const displayInnerRef = useRef<HTMLUListElement>(null);
   // Auto scrolls to bottom of the thread with every new message or if display changes height
   useEffect(() => {
     if (!displayInnerRef.current) return;
     displayInnerRef.current.scrollTop = displayInnerRef.current.scrollHeight;
-  }, [isLoading]);
+  }, [isLoading, containerSize]);
 
   return (
     <div className="flex w-[70vw] max-w-[800px] h-[inherit] bg-mygrey rounded-[20px]">
-      <div className="flex items-end m-10 pr-[20px] text-left w-full overflow-y-scroll">
+      <div className="flex items-end m-10 text-left w-full overflow-y-scroll">
         <ul
-          className="h-[438px] overflow-y-scroll w-full"
+          className="flex flex-col justify-start h-full overflow-y-scroll w-full pr-4"
           ref={displayInnerRef}>
           {mailbox.map((message, index) => (
             <ListItem
@@ -50,7 +56,7 @@ type ListItemProps = {
 function ListItem({ message, className, isRedacted }: ListItemProps) {
   return (
     <li
-      className={`flex items-start text-mywhite text-[18px] animate-fadeIn ${className}`}>
+      className={`flex items-start w-full text-mywhite text-[18px] animate-fadeIn ${className}`}>
       <Text
         sender={message?.sender ?? (isRedacted ? 'ai' : 'security')}
         text={message?.text ?? 'Loading'}
@@ -83,7 +89,7 @@ function Text({ sender, text }: TextProps) {
             : 'bg-myconcrete'
         }`}
       />
-      <div className="w-full">
+      <div className="w-full flex-1 min-w-0">
         <span className="inline font-bold">
           {sender === 'user'
             ? 'You'
@@ -95,8 +101,8 @@ function Text({ sender, text }: TextProps) {
         <span
           className={
             text === 'Loading'
-              ? "animate-ellipsis after:content-[''] after:inline after:animate-ellipsis"
-              : ''
+              ? "animate-ellipsis after:content-[''] after:inline after:animate-ellipsis break-words"
+              : 'break-words'
           }>
           {textWithLineBreaks}
         </span>

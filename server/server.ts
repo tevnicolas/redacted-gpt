@@ -33,9 +33,11 @@ type Auth = {
   password: string;
 };
 
+/* In development, this code will use the process.env.DATABASE_URL env variable to connect to the database. In production, this local env will be undefined, so instead the RDS envs will be used; RDS environment variables refer to credentials / connection details necessary to connect to Amazon Relational Database Service (RDS) instance. */
 const connectionString =
   process.env.DATABASE_URL ||
   `postgresql://${process.env.RDS_USERNAME}:${process.env.RDS_PASSWORD}@${process.env.RDS_HOSTNAME}:${process.env.RDS_PORT}/${process.env.RDS_DB_NAME}`;
+
 const db = new pg.Pool({
   connectionString,
   ssl: {

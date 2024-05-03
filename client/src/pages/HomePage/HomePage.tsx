@@ -26,6 +26,9 @@ export function HomePage() {
   const [currentSet, setCurrentSet] = useState('initial');
   const lastSetRef = useRef<string>('initial'); // using this ref like state
   const displayContainerRef = useRef<HTMLDivElement>(null);
+  const [displayContainerSize, setDisplayContainerSize] = useState<
+    number | undefined
+  >();
   const [isLoading, setIsLoading] = useState(false);
 
   // messages retrieves from session storage on mount
@@ -61,7 +64,7 @@ export function HomePage() {
     initialWriteBoxHeight: number,
     writeBoxHeight: number // it grows
   ) {
-    writeBoxHeight -= initialWriteBoxHeight;
+    const newHeight = writeBoxHeight - initialWriteBoxHeight;
     const display = displayContainerRef.current;
     if (!display) throw new Error('Missing display!');
     if (window.innerHeight > 740) {
@@ -69,7 +72,8 @@ export function HomePage() {
     } else {
       display.style.height = '47vh';
     }
-    display.style.height = String(display.offsetHeight - writeBoxHeight) + 'px';
+    display.style.height = String(display.offsetHeight - newHeight) + 'px';
+    setDisplayContainerSize(display.offsetHeight);
   }
 
   async function handleRedact() {
@@ -134,6 +138,7 @@ export function HomePage() {
     <>
       <div ref={displayContainerRef}>
         <Display
+          containerSize={displayContainerSize}
           mailbox={messages}
           isLoading={isLoading}
           isRedacted={isRedacted}
