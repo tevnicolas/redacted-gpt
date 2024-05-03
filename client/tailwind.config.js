@@ -31,6 +31,10 @@ export default {
         fadeIn: 'fadeIn 0.5s ease-out forwards',
         ellipsis: 'ellipsis 1.5s infinite',
       },
+      screens: {
+        'bw-860': '860px',
+        'bw-1051': '1051px',
+      },
     },
   },
   plugins: [],

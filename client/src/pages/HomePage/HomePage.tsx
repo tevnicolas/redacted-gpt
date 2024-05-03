@@ -64,7 +64,11 @@ export function HomePage() {
     writeBoxHeight -= initialWriteBoxHeight;
     const display = displayContainerRef.current;
     if (!display) throw new Error('Missing display!');
-    display.style.height = '55vh';
+    if (window.innerHeight > 740) {
+      display.style.height = '55vh';
+    } else {
+      display.style.height = '47vh';
+    }
     display.style.height = String(display.offsetHeight - writeBoxHeight) + 'px';
   }
 
@@ -125,10 +129,10 @@ export function HomePage() {
       if (!(error instanceof ReqInProgressError)) setIsLoading(false);
     }
   }
-
+  // height of display container is being controlled by ref
   return (
     <>
-      <div className="h-[50vh]" ref={displayContainerRef}>
+      <div ref={displayContainerRef}>
         <Display
           mailbox={messages}
           isLoading={isLoading}

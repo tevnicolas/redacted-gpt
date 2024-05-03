@@ -1,11 +1,43 @@
 import { UserPassEntry } from '../../components/LogIn';
 import { Button } from '../../components/Button';
+import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function SignUpPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      setIsLoading(true);
+      const formData = new FormData(event.currentTarget);
+      const userData = Object.fromEntries(formData);
+      const req = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      };
+      const res = await fetch('/api/auth/sign-up', req);
+      if (!res.ok) {
+        throw new Error(`fetch Error ${res.status}`);
+      }
+      const user = await res.json();
+      console.log('Registered', user);
+      alert(
+        `Successfully registered ${user.username} as userId ${user.userId}.`
+      );
+      navigate('/');
+    } catch (err) {
+      alert(`Error registering user: ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="flex h-[80vh] items-center justify-center">
       <div className="flex justify-center items-center rounded-[500px] bg-myyellow h-[500px] w-[500px]">
-        <form className="m-[10px]">
+        <form className="m-[10px]" onSubmit={handleSubmit}>
           <div className="mb-[20px]">
             <h1 className="font-Righteous w-full">SignUp</h1>
           </div>
@@ -24,7 +56,7 @@ export function SignUpPage() {
           <div className="flex justify-center mb-[40px] mt-[50px]">
             <div className="flex justify-between w-[200px]">
               <p className="underline">Log in...</p>
-              <Button text="Submit" />
+              <Button text="Submit" disabled={isLoading} />
             </div>
           </div>
         </form>

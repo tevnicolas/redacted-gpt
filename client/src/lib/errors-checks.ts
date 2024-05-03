@@ -1,6 +1,3 @@
-import { FilterSet } from 'shared/types';
-import { defaultFilterSet } from './default-filter-set';
-
 /** To distinguish between client side validation and other errors. Basically starting at the toString() I'm insisting no prepended error ('Error: ' or 'ValidationError: ') because I don't think my simple form style validation needs an error warning */
 export class ValidationError extends Error {
   isValidationError: boolean;
@@ -94,32 +91,4 @@ export class UnauthorizedError extends Error {
   toString() {
     return `Unauthorized: ${this.message}`;
   }
-}
-
-export function isDefaultFilterSet(filterSet: FilterSet): boolean {
-  const allowedExtraKey = 'filterSetId';
-  const keys = Object.keys(filterSet);
-  const defaultKeys = Object.keys(defaultFilterSet);
-  // Check for exact match or one additional 'filterSetId' key
-  if (
-    keys.length !== defaultKeys.length &&
-    keys.length !== defaultKeys.length + 1
-  ) {
-    return false;
-  }
-  // Ensure that any additional key is exactly 'filterSetId'
-  if (
-    keys.length === defaultKeys.length + 1 &&
-    !keys.includes(allowedExtraKey)
-  ) {
-    return false;
-  }
-  // Check all keys in defaultFilterSet for value match
-  for (const key of defaultKeys) {
-    if (filterSet[key] !== defaultFilterSet[key]) {
-      return false;
-    }
-  }
-
-  return true;
 }
