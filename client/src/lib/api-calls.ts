@@ -38,16 +38,16 @@ export async function readAccountSets(
           );
     throw error;
   }
-  const filterSets: AccountFilterSet[] = await res.json();
+  const result: AccountFilterSet[] = await res.json();
   // Will be caught as unexpected error
-  if (!filterSets) throw 'Data retrieval services are possibly down.';
-  return filterSets;
+  if (!result) throw 'Data retrieval services are possibly down.';
+  return result;
 }
 
 export async function addAccountSet(
-  filterSet: SessionFilterSet,
+  filterSet: SessionFilterSet, // will be assigned an Id by the database
   token: string
-): Promise<AccountFilterSet> {
+): Promise<void> {
   const res = await fetch('/api/filter-sets', {
     method: 'POST',
     headers: {
@@ -56,10 +56,75 @@ export async function addAccountSet(
     },
     body: JSON.stringify(filterSet),
   });
-  if (!res.ok)
-    throw new Error(`Failed to add Filter Set. Status: ${res.status}.`);
-  const result = await res.json();
-  return result;
+  if (!res.ok) {
+    const error =
+      res.status === 401
+        ? // Being explicit about expired token, parent catch will auto sign out
+          new UnauthorizedError(
+            'Your session has expired. Please log in again.'
+          )
+        : // Other error which does not call for sign out
+          new Error(
+            `Something went wrong while trying to add your Filter Set. Status: ${res.status}.`
+          );
+    throw error;
+  }
+}
+
+export async function editAccountSet(
+  filterSet: AccountFilterSet,
+  token: string
+): Promise<void> {
+  const res = await fetch('/api/filter-sets', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(filterSet),
+  });
+  if (!res.ok) {
+    const error =
+      res.status === 401
+        ? // Being explicit about expired token, parent catch will auto sign out
+          new UnauthorizedError(
+            'Your session has expired. Please log in again.'
+          )
+        : // Other error which does not call for sign out
+          new Error(
+            `Something went wrong while trying to update your Filter Set. Status: ${res.status}.`
+          );
+    throw error;
+  }
+}
+
+export async function deleteAccountSet(
+  filterSetId: number,
+  token: string
+): Promise<void> {
+  const res = await fetch('/api/filter-sets', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ filterSetId }),
+  });
+  if (!res.ok) {
+    if (!res.ok) {
+      const error =
+        res.status === 401
+          ? // Being explicit about expired token, parent catch will auto sign out
+            new UnauthorizedError(
+              'Your session has expired. Please log in again.'
+            )
+          : // Other error which does not call for sign out
+            new Error(
+              `Something went wrong while trying to delete the Filter Set. Status: ${res.status}.`
+            );
+      throw error;
+    }
+  }
 }
 
 /** Sends raw text and Filter Set applied request,
