@@ -43,7 +43,7 @@ export default function App() {
   }
 
   async function addFilterSet(filterSet: SessionFilterSet) {
-    const originalFilterSets = [...filterSets]; // copy for rollback on error
+    const originalFilterSets = [...filterSets]; // copy for rollback / update
     try {
       // sessionStorage will be updated synchronously as an optimistic update
       const newFilterSets = [filterSet, ...filterSets];
@@ -52,7 +52,8 @@ export default function App() {
         // important to keep this code in each one of these action functions; putting it in a useEffect with filterSets as a dependency creates a race condition with loadFilterSets().
         sessionStorage.setItem('filterSets', JSON.stringify(newFilterSets));
       } else {
-        await addAccountSet(filterSet, token);
+        const accountSet = await addAccountSet(filterSet, token);
+        setFilterSets([accountSet, ...originalFilterSets]);
       }
     } catch (error) {
       setError(error);

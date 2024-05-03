@@ -47,7 +47,8 @@ export async function readAccountSets(
 export async function addAccountSet(
   filterSet: SessionFilterSet, // will be assigned an Id by the database
   token: string
-): Promise<void> {
+  /* Necessary to replace optimistic update w/ the DB assigned filterSetId; Updating type is crucial for Acc. CRUD operations working as intended */
+): Promise<AccountFilterSet> {
   const res = await fetch('/api/filter-sets', {
     method: 'POST',
     headers: {
@@ -69,11 +70,14 @@ export async function addAccountSet(
           );
     throw error;
   }
+  const result: AccountFilterSet = await res.json();
+  return result;
 }
 
 export async function editAccountSet(
   filterSet: AccountFilterSet,
   token: string
+  // Unnecessary to replace optimistic update w/ identical data
 ): Promise<void> {
   const res = await fetch('/api/filter-sets', {
     method: 'PUT',
@@ -101,9 +105,10 @@ export async function editAccountSet(
 export async function deleteAccountSet(
   filterSetId: number,
   token: string
+  // Unnecessary to replace optimistic update w/ identical data
 ): Promise<void> {
   const res = await fetch('/api/filter-sets', {
-    method: 'PUT',
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
