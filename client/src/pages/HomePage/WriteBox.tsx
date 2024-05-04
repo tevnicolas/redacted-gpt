@@ -56,26 +56,6 @@ export function WriteBox({
 
   return (
     <div className="mt-[15px]">
-      <style>
-        {`
-          .custom-textarea::-webkit-scrollbar {
-            width: 23px; /* Scrollbar width */
-          }
-          .custom-textarea::-webkit-scrollbar-track {
-            background: transparent;
-            margin-block: 15px;
-
-          }
-          .custom-textarea::-webkit-scrollbar-thumb {
-            background-color: grey;
-            border-radius: 23px;
-            border: 8px solid rgba(0, 0, 0, 0);
-            background-clip: padding-box;
-            min-height: 30px;
-          }
-
-        `}
-      </style>
       <textarea
         ref={textareaRef}
         className="custom-textarea flex items-center bg-myconcrete border-[1px] border-black rounded-[40px] pt-2 pb-2 pl-6 pr-6 ml-1 mr-1 overflow-y-scroll resize-none text-[15px] max-w-[500px] w-[60vw] sm:w-[60vw] md:w-[60vw] bw-860:w-[40vw] bw-1050:w-[40vw]"

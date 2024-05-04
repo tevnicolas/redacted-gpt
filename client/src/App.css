@@ -22,10 +22,21 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.wrapper::-webkit-scrollbar-track {
-  padding-top: 100px;
-  margin-bottom: 10px;
-  background-color: blue;
+.custom-textarea::-webkit-scrollbar {
+  width: 23px; /* Scrollbar width */
+}
+
+.custom-textarea::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 15px;
+}
+
+.custom-textarea::-webkit-scrollbar-thumb {
+  background-color: grey;
+  border-radius: 23px;
+  border: 8px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  min-height: 30px;
 }
 
 @keyframes logo-spin {
