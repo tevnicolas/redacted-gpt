@@ -3,6 +3,7 @@ import { Button } from './Button';
 import { FormEvent, useEffect, useState } from 'react';
 import { FadeInWrapper } from './FadeInWrapper';
 import { useUser } from './useUser';
+import { UnauthorizedError } from '../lib/errors-checks';
 
 type LogInProps = {
   status: boolean;
@@ -17,8 +18,10 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
   const navigate = useNavigate();
   const [hoverToggle, setHoverToggle] = useState(false);
   const hoverStyle = hoverToggle ? 'hover:bg-myyellow' : 'hover:bg-mywhite';
+
   useEffect(() => {
     setHoverToggle((prev) => !prev);
+    setError(undefined);
   }, [loginDropdown]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -33,13 +36,13 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
         body: JSON.stringify(userData),
       };
       const res = await fetch('/api/auth/sign-in', req);
-      if (!res.ok) {
-        throw new Error(`fetch Error ${res.status}`);
+      if (!res.ok && res.status === 401) {
+        throw new UnauthorizedError('Email or Password is Incorrect.');
+      } else if (!res.ok) {
+        throw new Error('Oops! Something went wrong.');
       }
       const { user, token } = await res.json();
       handleSignIn(user, token);
-      console.log('Signed In', user);
-      console.log('Received token:', token);
     } catch (error) {
       setError(error);
     } finally {
@@ -93,7 +96,7 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
                   />
                 </>
               )}
-              <p>{`${error}`}</p>
+              {!!error && <p className="text-red-500">{String(error)}</p>}
             </form>
           </div>
         </FadeInWrapper>

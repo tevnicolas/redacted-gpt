@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { LogIn, Triangle } from './LogIn';
 import { LuMenuSquare } from 'react-icons/lu';
-import { useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FadeInWrapper } from './FadeInWrapper';
 import { useError } from './useError';
 
@@ -22,6 +22,13 @@ export function Header() {
     setMobileMenuDropdown((prev) => !prev);
     setLoginDropdown(false);
   }, []);
+
+  useEffect(() => {
+    if (location.state?.from === '/sign-up') {
+      console.log(location.state?.from);
+      setLoginDropdown(true);
+    }
+  }, [location.state?.from]);
 
   return (
     <>

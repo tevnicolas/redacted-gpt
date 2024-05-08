@@ -26,9 +26,9 @@ export function SignUpPage() {
       alert(
         `Successfully registered ${user.username} as userId ${user.userId}.`
       );
-      navigate('/');
-    } catch (err) {
-      alert(`Error registering user: ${err}`);
+      navigate('/', { state: { from: '/sign-up' } });
+    } catch (error) {
+      alert(`Error registering user: ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,9 @@ export function SignUpPage() {
             <UserPassEntry type="password" size={15} />
           </div>
           <div className="flex justify-center mb-[40px] mt-[50px]">
-            <div className="flex justify-between w-[200px]">
+            <div
+              className="flex justify-between w-[200px]"
+              onClick={() => navigate('/', { state: { from: '/sign-up' } })}>
               <p className="underline">Log in...</p>
               <Button text="Submit" disabled={isLoading} />
             </div>
