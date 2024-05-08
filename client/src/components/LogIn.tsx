@@ -71,8 +71,8 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
             <form className="m-[15px]" onSubmit={handleSubmit}>
               {!token ? (
                 <>
-                  <UserPassEntry type="user" size={11} />
-                  <UserPassEntry type="password" size={11} />
+                  <UserPassEntry type="user" className={'w-full'} />
+                  <UserPassEntry type="password" className={'w-full'} />
                   <div className="flex justify-between m-[10px]">
                     <Button text="Login" />
                     <Link to="/sign-up">
@@ -107,10 +107,10 @@ export function LogIn({ status, loginDropdown, onClick }: LogInProps) {
 
 type UserPassEntryProps = {
   type: string;
-  size: number;
+  className: string;
 };
 
-export function UserPassEntry({ type, size }: UserPassEntryProps) {
+export function UserPassEntry({ type, className }: UserPassEntryProps) {
   return (
     <div className="flex items-center m-[5px]">
       <div className="min-w-[50px]">
@@ -121,8 +121,7 @@ export function UserPassEntry({ type, size }: UserPassEntryProps) {
       <input
         name={type === 'user' ? 'username' : 'password'}
         type={type === 'user' ? 'text' : 'password'}
-        size={size}
-        className="bg-myconcrete pl-1 pr-1 max-h-[22px]"
+        className={`bg-myconcrete pl-1 pr-1 max-h-[22px] ${className}`}
       />
     </div>
   );

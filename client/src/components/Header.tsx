@@ -23,11 +23,15 @@ export function Header() {
     setLoginDropdown(false);
   }, []);
 
+  /* Triggers the login dropdown if user came from /sign-up page. Also cleans up the page state on unmount. */
   useEffect(() => {
     if (location.state?.from === '/sign-up') {
       console.log(location.state?.from);
       setLoginDropdown(true);
     }
+    return () => {
+      window.history.replaceState({}, '');
+    };
   }, [location.state?.from]);
 
   return (

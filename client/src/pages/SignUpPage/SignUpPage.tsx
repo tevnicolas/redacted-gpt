@@ -26,6 +26,7 @@ export function SignUpPage() {
       alert(
         `Successfully registered ${user.username} as userId ${user.userId}.`
       );
+      // this state is used to enable log in dropdown on navigation from sign up
       navigate('/', { state: { from: '/sign-up' } });
     } catch (error) {
       alert(`Error registering user: ${error}`);
@@ -48,14 +49,15 @@ export function SignUpPage() {
             </p>
           </div>
           <div className="flex mb-[40px] text-[22px]">
-            <UserPassEntry type="user" size={15} />
+            <UserPassEntry type="user" className={'max-w-[174px]'} />
           </div>
           <div className="flex mb-[20px] text-[22px]">
-            <UserPassEntry type="password" size={15} />
+            <UserPassEntry type="password" className={'max-w-[174px]'} />
           </div>
           <div className="flex justify-center mb-[40px] mt-[50px]">
             <div
               className="flex justify-between w-[200px]"
+              // this state is used to enable log in dropdown on navigation from sign up
               onClick={() => navigate('/', { state: { from: '/sign-up' } })}>
               <p className="underline">Log in...</p>
               <Button text="Submit" disabled={isLoading} />
