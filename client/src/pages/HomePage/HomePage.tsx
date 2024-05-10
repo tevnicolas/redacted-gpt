@@ -60,6 +60,11 @@ export function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText, currentSet, messages]);
 
+  useEffect(() => {
+    // when user did not redact, select will still revert appropriately
+    if (currentSet !== 'review') lastSetRef.current = currentSet;
+  }, [currentSet]);
+
   function adjustDisplayHeight(
     initialWriteBoxHeight: number,
     writeBoxHeight: number // it grows
@@ -83,7 +88,6 @@ export function HomePage() {
       setIsLoading(true);
       const redactedText = await presidioRedaction(inputText, currentSet);
       setIsRedacted(true);
-      lastSetRef.current = currentSet;
       setCurrentSet('review');
       setInputText(redactedText);
       const newSecurityMessage: Message = {
@@ -114,8 +118,6 @@ export function HomePage() {
       setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
       const aiAnalysisRes = await promptChatGPT(inputText);
-      // when user did not redact, select will still revert appropriately
-      if (currentSet !== 'review') lastSetRef.current = currentSet;
       // If any filter set except 'none' was last set, show redact option again
       if (lastSetRef.current !== 'none') setIsRedacted(false);
       // revert
