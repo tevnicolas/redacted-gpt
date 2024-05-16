@@ -118,3 +118,9 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+@media (width <= 767px) {
+  :root {
+    background-color: rgba(218, 218, 218);
+  }
+}

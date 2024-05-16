@@ -40,7 +40,7 @@ export function Header() {
         <div className="w-[120px] min-w-[120px]">
           <img src="/images/logo.png" className="w-full" />
         </div>
-        <div className="hidden [@media(width>=767px)]:flex flex items-center bg-mywhite mt-[14px] rounded-[40px] w-[410px] h-14">
+        <div className="hidden [@media(width>=768px)]:flex flex items-center bg-mywhite mt-[14px] rounded-[40px] w-[410px] h-14">
           <div className="flex w-[97%] justify-center ml-[5px]">
             <Page text="Home" />
             <Page text="Filter Sets" />
@@ -63,7 +63,9 @@ export function Header() {
         </div>
       </div>
       {mobileMenuDropdown && (
-        <div className="hidden [@media(width<=767px)]:flex flex flex-wrap justify-end absolute top-[80px] right-[49px]">
+        <div
+          className="hidden [@media(width<=767px)]:flex flex flex-wrap justify-end absolute top-[80px] right-[49px]"
+          onClick={() => setMobileMenuDropdown(false)}>
           <Triangle />
           <div className="z-10 flex flex-wrap items-center justify-center bg-mywhite w-[20vw] min-w-[150px] h-[350px] rounded-[20px]">
             <Page text="Home" />
