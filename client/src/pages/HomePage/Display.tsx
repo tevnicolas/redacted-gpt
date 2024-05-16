@@ -22,7 +22,7 @@ export function Display({
   }, [isLoading, containerSize]);
 
   return (
-    <div className="flex w-[70vw] max-w-[800px] h-[inherit] bg-mygrey rounded-[20px]">
+    <div className="flex w-[70vw] rounded-[20px] [@media(width<=767px)]:w-[100vw] [@media(width<=767px)]:rounded-[0] max-w-[800px] h-[inherit] bg-mygrey">
       <div className="flex items-end m-10 text-left w-full">
         <ul
           className="flex flex-col justify-start h-full overflow-y-auto w-full pr-4"
