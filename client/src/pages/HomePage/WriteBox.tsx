@@ -58,8 +58,8 @@ export function WriteBox({
     <div className="mt-[15px]">
       <textarea
         ref={textareaRef}
-        className="custom-textarea flex items-center bg-myconcrete border-[1px] border-black rounded-[40px] pt-2 pb-2 pl-6 pr-6 ml-1 mr-1 overflow-y-scroll resize-none text-[15px] max-w-[500px] w-[60vw] sm:w-[60vw] md:w-[60vw] bw-768:w-[40vw] bw-1050:w-[40vw]"
-        placeholder="Select Filter Set, Write, Redact, Prompt!"
+        className="custom-textarea flex items-center bg-myconcrete border-[1px] border-black rounded-[40px] pt-2 pb-2 pl-6 pr-6 ml-1 mr-1 overflow-y-scroll resize-none text-[15px] max-w-[500px] bw-488:w-[60vw] bw-768:w-[40vw]]"
+        placeholder="Select, Write, Redact, Prompt!"
         onChange={(e) => {
           onChange(e.currentTarget.value);
         }}

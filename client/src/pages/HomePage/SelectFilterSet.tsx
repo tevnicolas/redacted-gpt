@@ -51,9 +51,7 @@ export function SelectFilterSet({
         className={`flex items-center text-center text-mywhite rounded-[40px] p-1 ml-1 mr-1 border-[5.5px] border-black w-[98px] min-w-[98px] max-w-[98px] text-[15px] h-[39px] bg-black select-none truncate ${
           currentSet === 'review' && 'border-blue-500'
         }`}>
-        <option value="initial">
-          {'Pick Filter or Filter Set---choose below---'}
-        </option>
+        <option value="initial">{'Select Filter ---choose below---'}</option>
         <option value="create">+Create Filter Set</option>
         <option className="hidden" value="review">
           Review

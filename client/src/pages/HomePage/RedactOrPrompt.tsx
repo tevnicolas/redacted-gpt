@@ -22,7 +22,7 @@ export function RedactOrPrompt({
       <button
         type="button"
         onClick={isRedacted ? onPrompt : onRedact}
-        className={`flex justify-center items-center text-center rounded-[40px] pt-1 pb-1 pl-2 pr-2 ml-1 mr-1 border-[5.5px] min-w-[73.55px] max-w-[73.55px] text-[15px] h-[39px] select-none
+        className={`flex justify-center items-center text-center rounded-[40px] pt-1 pb-1 pl-2 pr-2 ml-1 mr-1 border-[5.5px] min-w-[40px] max-w-[73.55px] text-[15px] h-[39px] select-none bw-488:min-w-[73.55px]
         ${styles}`}>
         {isRedacted ? 'Prompt' : 'Redact'}
       </button>

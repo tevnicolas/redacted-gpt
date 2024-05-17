@@ -165,7 +165,7 @@ export function HomePage() {
         />
       </div>
       <div
-        className="flex flex-nowrap justify-center items-end w-full m-[20px] max-h-[200px] [@media(width<=767px)]:fixed [@media(width<=767px)]:inset-x-0 [@media(width<=767px)]:bottom-0"
+        className="flex flex-nowrap justify-center items-end w-[100vw] max-w-[100vw] mt-[20px] mb-[20px] max-h-[200px] [@media(width<=767px)]:fixed [@media(width<=767px)]:inset-x-0 [@media(width<=767px)]:bottom-0"
         ref={inputContainerRef}>
         <WriteBox
           setError={setError}
