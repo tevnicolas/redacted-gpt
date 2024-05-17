@@ -26,6 +26,7 @@ export function HomePage() {
   const [currentSet, setCurrentSet] = useState('initial');
   const lastSetRef = useRef<string>('initial'); // using this ref like state
   const displayContainerRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
   const [displayContainerSize, setDisplayContainerSize] = useState<
     number | undefined
   >();
@@ -64,6 +65,23 @@ export function HomePage() {
     // when user did not redact, select will still revert appropriately
     if (currentSet !== 'review') lastSetRef.current = currentSet;
   }, [currentSet]);
+
+  useEffect(() => {
+    const handleKeyboard = () => {
+      if (!inputContainerRef.current) return;
+      inputContainerRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start',
+      });
+    };
+
+    window.addEventListener('resize', handleKeyboard);
+
+    return () => {
+      window.removeEventListener('resize', handleKeyboard);
+    };
+  }, []);
 
   function adjustDisplayHeight(
     initialWriteBoxHeight: number,
@@ -146,14 +164,16 @@ export function HomePage() {
           isRedacted={isRedacted}
         />
       </div>
-      <div className="flex flex-wrap justify-center items-end w-full m-[20px] max-h-[200px]">
+      <div
+        className="flex flex-nowrap justify-center items-end w-full m-[20px] max-h-[200px] [@media(width<=767px)]:fixed [@media(width<=767px)]:inset-x-0 [@media(width<=767px)]:bottom-0"
+        ref={inputContainerRef}>
         <WriteBox
           setError={setError}
           inputText={inputText}
           onChange={setInputText}
           adjustDisplayHeight={adjustDisplayHeight}
         />
-        <div className="flex flex-wrap justify-center">
+        <div className="flex flex-nowrap justify-center">
           <SelectFilterSet
             setIsRedacted={setIsRedacted}
             currentSet={currentSet}

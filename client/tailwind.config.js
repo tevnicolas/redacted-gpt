@@ -32,6 +32,7 @@ export default {
         ellipsis: 'ellipsis 1.5s infinite',
       },
       screens: {
+        'bw-768': '768px',
         'bw-860': '860px',
         'bw-1051': '1051px',
       },
