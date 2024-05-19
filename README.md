@@ -1,6 +1,9 @@
 # RedactedGPT
 
-![License](https://img.shields.io/github/license/tevnicolas/redactedgpt)
+![License](https://img.shields.io/github/license/tevnicolas/redacted-gpt)
+![Issues](https://img.shields.io/github/issues/tevnicolas/redacted-gpt)
+![Stars](https://img.shields.io/github/stars/tevnicolas/redacted-gpt)
+![Forks](https://img.shields.io/github/forks/tevnicolas/redacted-gpt)
 
 ## Table of Contents
 
@@ -75,4 +78,4 @@ For any questions or feedback, please contact:
 
 Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
-Project Link: [https://github.com/your-username/redactedgpt](https://github.com/tevnicolas/redacted-gpt/)
+Project Link: [https://github.com/tevnicolas/redacted-gpt](https://github.com/tevnicolas/redacted-gpt)
