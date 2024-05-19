@@ -1,139 +1,80 @@
-# full-stack-project
+# RedactedGPT
 
-A full stack TypeScript solo project.
+![License](https://img.shields.io/github/license/your-username/redactedgpt)
+![Issues](https://img.shields.io/github/issues/your-username/redactedgpt)
+![Stars](https://img.shields.io/github/stars/your-username/redactedgpt)
+![Forks](https://img.shields.io/github/forks/your-username/redactedgpt)
 
-## Getting Started
+## Table of Contents
 
----
+- [Description](#description)
+- [Features](#features)
+- [Demo](#demo)
+- [Usage](#usage)
+- [License](#license)
+- [Contact](#contact)
 
-### Use this template to create a new repo on your GitHub account
+## Description
 
-1. Click the green `Use this template` button, select `Create a new repository`
-   1. Under `Owner` select your username
-   1. Give your repository a name. Name it after your application. The name `full-stack-project` is _not_ a good name.
-   1. (Optional) Add a description
-   1. Leave repository as `Public`
-   1. **DO NOT** Include all branches
-   1. Click the green `Create repository from template` button
+RedactedGPT is a full-stack web application designed for security-conscious professionals. It enables the safe analysis of text data using AI by incorporating redaction of sensitive information. This ensures that any sensitive data is filtered before being processed by OpenAI's API, maintaining privacy and security.
 
----
+The application features a responsive front-end built with TypeScript, React, and Tailwind CSS. The back-end is robustly designed using Node.js, Express.js, and a PostgreSQL database, hosted on AWS. For text redaction, RedactedGPT integrates Microsoft Presidio, a tool for machine learning-powered text redaction, allowing users to safely use OpenAI's API with filtered data.
 
-### Clone Newly created repo into `lfz-code`
+## Features
 
-1. From your newly created repo on GitHub, click the green `<> Code` button, then copy **SSH** URL
-1. Open `lfz-code`, click on blue `><` button in bottom left of `lfz-code`
-   1. Select `Clone Repository in Container Volume...`
-   1. Paste **SSH** URL for your repo, click `Clone git repository from URL`
+- **User Authentication**:
+  - Create an account or proceed as a guest.
+  - Guests have full access but their saved filter sets persist only for the session.
 
----
+- **Redaction Filter Sets**:
+  - Create redaction filter sets by selecting types of information to redact (e.g., names, addresses, phone numbers, emails, social security numbers, credit card numbers).
+  - Label and manage multiple filter sets.
+  - Edit and delete existing filter sets.
 
-### Run and test project setup
+- **Prompt Management**:
+  - Type in a prompt, select a filter set, and view/edit the redacted text.
+  - Submit prompts to the ChatGPT API.
+  - View and interact with the AI-generated responses.
 
-#### Getting Started
+- **User Experience**:
+  - Designed with a user-friendly interface for easy navigation and use.
+  - Efficiently manage data with JSON, storing account data in a database for logged-in users and guest data in session storage.
 
-1. Install all dependencies with `npm install`.
+## Demo
 
-#### Create the database
+![Uploading Kapture 2024-05-19 at 14.50.49.gif…]()
 
-If your project will be using a database, create it now.
+## Usage
 
-1. Start PostgreSQL
-   ```sh
-   sudo service postgresql start
-   ```
-1. Create database (replace `name-of-database` with a name of your choosing, such as the name of your app)
-   ```sh
-   createdb name-of-database
-   ```
-1. In the `server/.env` file, in the `DATABASE_URL` value, replace `changeMe` with the name of your database, from the last step
-1. While you are editing `server/.env`, also change the value of `TOKEN_SECRET` to a custom value, without spaces.
-1. Make the same changes to `server/.env.example`.
+To use RedactedGPT, follow these steps:
 
-If your project will _not_ be using a database, edit `package.json` to remove the `dev:db` script.
+1. **Visit the Application**:
+   Go to [RedactedGPT](https://your-live-demo-link.com).
 
-#### Start the development servers
+2. **Authentication**:
+   - Create an account or continue as a guest.
 
-1. Start all the development servers with the `"dev"` script:
-   ```sh
-   npm run dev
-   ```
-1. Later, when you wish to stop the development servers, type `Ctrl-C` in the terminal where the servers are running.
+3. **Create Redaction Filter Sets**:
+   - Select the types of information you want to redact (e.g., names, addresses).
+   - Label the filter set for future use.
 
-#### Verify the client
+4. **Submit Prompts**:
+   - Type your text prompt.
+   - Select the appropriate filter set to redact sensitive information.
+   - View and edit the redacted text if necessary.
 
-1. A React app has already been created for you.
-1. Take a minute to look over the code in `client/src/App.tsx` to get an idea of what it is doing.
-1. Go to the app in your browser. You should see the message from the server below the React logo, and in the browser console.
-   ![](md.assets/client-server.png)
-1. If you see the message from the server in your browser you are good to go, your client and server are communicating.
+5. **AI Analysis**:
+   - Submit the redacted prompt to the ChatGPT API.
+   - Review the AI-generated response.
 
-#### Set up the database
+## License
 
-1. In your browser navigate to the site you used for your database design.
-1. Export your database as PostgreSQL, this should generate the SQL code for creating your database tables.
-   - Reach out to an instructor if you have any issues with this step
-1. Copy the generated SQL code and paste it into `database/schema.sql` below the preexisting sql code in the file. The end result should look something like: _(You will likely have more tables)_
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-   ```SQL
-   set client_min_messages to warning;
+## Contact
 
-   -- DANGER: this is NOT how to do it in the real world.
-   -- `drop schema` INSTANTLY ERASES EVERYTHING.
-   drop schema "public" cascade;
+For any questions or feedback, please contact:
 
-   create schema "public";
+Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
-   create table "todos" (
-       "todoId"      serial PRIMARY KEY,
-       "task"        text           not null,
-       "isCompleted" boolean        not null,
-       "createdAt"   timestamptz(6) not null default now(),
-       "updatedAt"   timestamptz(6) not null default now()
-   );
-   ```
-
-1. In a separate terminal, run `npm run db:import` to create your tables
-1. Use `psql` to verify your tables were created successfully (see [LFZ Database Guide](https://lms.learningfuze.com/code-guides/Learning-Fuze/curriculum/database) for tips). Your database and tables should be listed; if not, stop here and reach out to an instructor for help
-1. At this point your database is setup and you are good to start using it. However there is no data in your database, which isn't necessarily a bad thing, but if you want some starting data in your database you need to add insert statements into the `database/data.sql` file. You can add whatever starting data you need/want. Here is an example:
-   ```SQL
-   insert into "todos" ("task", "isCompleted")
-   values
-       ('Learn to code', false),
-       ('Build projects', false),
-       ('Get a job', false);
-   ```
-1. After any changes to `database/schema.sql` or `database/data.sql` re-run the `npm run db:import` command to update your database. Use `psql` to verify your changes were successfully applied.
-
-## Deployment
-
-Once your template is set up and functional, deploy it. This will get all the deployment issues ironed out early. During development, you should re-deploy frequently to make sure that your code works properly in your production environment. Deployment instructions can be found [HERE](https://github.com/Learning-Fuze/lfz-portfolios/tree/master/deploy-to-elastic-beanstalk)
-
----
-
-### Available `npm` commands explained
-
-Below is an explanation of all included `npm` commands in the root `package.json`. Several are only used for deployment purposes and should not be necessary for development.
-
-1. `start`
-   - The `start` script starts the Node server in `production` mode, without any file watchers.
-1. `build`
-   - The `build` script executes `npm run build` in the context of the `client` folder. This builds your React app for production. This is used during deployment, and not commonly needed during development.
-1. `db:import`
-   - The `db:import` script executes `database/import.sh`, which executes the `database/schema.sql` and `database/data.sql` files to build and populate your database.
-1. `dev`
-   - Starts all the development servers.
-1. `lint`
-   - Runs ESLint against all the client and server code.
-1. Not directly used by developer
-   1. `install:*`
-   - These scripts install dependencies in the `client` and `server` folders, and copy `.env.example` to `.env` if it doesn't already exist.
-   1. `dev:*`
-   - These scripts start the individual development servers.
-   1. `lint:*`
-   - These scripts run lint in the client and server directories.
-   1. `postinstall`
-      - The `postinstall` script is automatically run when you run `npm install`. It is executed after the dependencies are installed. Specifically for this project the `postinstall` script is used to install the `client` and `server` dependencies.
-   1. `prepare`
-      - The `prepare` script is similar to `postinstall` — it is executed before `install`. Specifically for this project it is used to install `husky`.
-   1. `deploy`
-      - The `deploy` script is used to deploy the project by pushing the `main` branch to the `pub` branch, which triggers the GitHub Action that deploys the project.
+Project Link: [https://github.com/your-username/redactedgpt](https://github.com/tevnicolas/redacted-gpt/)
