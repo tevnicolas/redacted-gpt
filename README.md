@@ -1,9 +1,6 @@
 # RedactedGPT
 
-![License](https://img.shields.io/github/license/your-username/redactedgpt)
-![Issues](https://img.shields.io/github/issues/your-username/redactedgpt)
-![Stars](https://img.shields.io/github/stars/your-username/redactedgpt)
-![Forks](https://img.shields.io/github/forks/your-username/redactedgpt)
+![License](https://img.shields.io/github/license/tevnicolas/redactedgpt)
 
 ## Table of Contents
 
