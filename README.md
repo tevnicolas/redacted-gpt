@@ -41,8 +41,9 @@ The application features a responsive front-end built with TypeScript, React, an
   - Efficiently manage data with JSON, storing account data in a database for logged-in users and guest data in session storage.
 
 ## Demo
+![Kapture 2024-05-19 at 14 50 49](https://github.com/tevnicolas/redacted-gpt/assets/155599138/b535c08c-3617-43f1-a3f5-b5ac215b9f07)
 
-![Uploading Kapture 2024-05-19 at 14.50.49.gif…]()
+
 
 ## Usage
 
