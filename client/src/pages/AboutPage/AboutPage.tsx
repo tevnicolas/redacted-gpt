@@ -1,7 +1,7 @@
 export function AboutPage() {
   return (
-    <div>
-      <div className="p-8 ml-12 mr-12">
+    <div className="max-w-[780px]">
+      <div className="bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
         <p className="text-left indent-10">
           RedactedGPT is a full-stack web application designed for
           security-conscious professionals. It enables the safe analysis of text
@@ -15,10 +15,10 @@ export function AboutPage() {
           anywhere, ensuring user privacy and data security.
         </p>
       </div>
-      <div className="p-8 ml-12 mr-12">
+      <div className="bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
         <img src="https://github.com/tevnicolas/redacted-gpt/assets/155599138/b535c08c-3617-43f1-a3f5-b5ac215b9f07" />
       </div>
-      <div className="p-8 ml-12 mr-12">
+      <div className="bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
         <p>To use RedactedGPT, follow these steps:</p>
         <p className="text-left">
           <br />
@@ -52,8 +52,6 @@ export function AboutPage() {
           the AI-generated response.
         </p>
       </div>
-      <div></div>
-      <div></div>
     </div>
   );
 }
