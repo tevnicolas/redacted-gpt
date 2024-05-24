@@ -15,6 +15,22 @@ export function AboutPage() {
           anywhere, ensuring user privacy and data security.
         </p>
       </div>
+      <div className="flex justify-center bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
+        <div className="flex justify-center">
+          <img
+            className="w-[70%]"
+            src="/images/ChatGPT-Logo.png"
+            alt="OpenAi Logo"
+          />
+        </div>
+        <div className="flex justify-center">
+          <img
+            className="w-[63%]"
+            src="/images/ms_icon.png"
+            alt="Microsoft Logo"
+          />
+        </div>
+      </div>
       <div className="bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
         <img src="https://github.com/tevnicolas/redacted-gpt/assets/155599138/b535c08c-3617-43f1-a3f5-b5ac215b9f07" />
       </div>
@@ -51,6 +67,12 @@ export function AboutPage() {
           the 'Prompt' button. Wait for successful generation, and then review
           the AI-generated response.
         </p>
+      </div>
+      <div className="flex justify-center bw-768:p-10 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
+        <img
+          src="/images/detection_flow.gif"
+          alt="Presidio Technology Visualizer"
+        />
       </div>
     </div>
   );

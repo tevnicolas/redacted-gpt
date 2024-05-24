@@ -38,7 +38,11 @@ export function Header() {
     <>
       <div className="flex justify-between w-full">
         <div className="w-[120px] min-w-[120px]">
-          <img src="/images/logo.png" className="w-full" />
+          <img
+            src="/images/logo.png"
+            alt="RedactedGPT Logo"
+            className="w-full"
+          />
         </div>
         <div className="hidden [@media(width>=768px)]:flex flex items-center bg-mywhite mt-[14px] rounded-[40px] w-[410px] h-14">
           <div className="flex w-[97%] justify-center ml-[5px]">
