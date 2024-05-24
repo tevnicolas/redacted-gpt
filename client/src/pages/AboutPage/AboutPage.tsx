@@ -1,7 +1,7 @@
 export function AboutPage() {
   return (
     <div className="max-w-[780px]">
-      <div className="bw-768:p-8 bw-768:ml-12 bw-768:mr-12 pt-8 pb-8">
+      <div className="bw-768:pb-8 bw-768:pl-8 bw-768:pr-8 bw-768:ml-12 bw-768:mr-12 pb-8">
         <p className="text-left indent-10">
           RedactedGPT is a full-stack web application designed for
           security-conscious professionals. It enables the safe analysis of text
