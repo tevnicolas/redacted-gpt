@@ -1,6 +1,6 @@
 export function SupportPage() {
   return (
-    <div className="max-w-[780px]">
+    <div className="max-w-[780px] min-h-[670px]">
       <div className="bw-768:pb-8 bw-768:pl-8 bw-768:pr-8 bw-768:ml-12 bw-768:mr-12 pb-8">
         <p className="text-left">
           For any questions or feedback, please contact:

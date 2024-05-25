@@ -40,34 +40,10 @@
   min-height: 30px;
 }
 
-.transparent-scroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  display: none;
-}
-
-.transparent-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  margin-block: 15px;
-}
-
-.transparent-scroll::-webkit-scrollbar-thumb {
-  background: rgba(166, 166, 166);
-  border-radius: 10px;
-  border: 2px solid transparent;
-}
-
-.transparent-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(166, 166, 166);
-}
-
-/* Show scrollbar on hover */
-.transparent-scroll:hover::-webkit-scrollbar {
-  display: block;
-}
-
 .transparent-scroll {
-  overflow: auto;
+  scroll-margin-block-start: 100px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(166, 166, 166) transparent;
 }
 
 select {
