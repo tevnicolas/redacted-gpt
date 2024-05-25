@@ -18,8 +18,8 @@ export function SupportPage() {
         <a
           className="hover:text-red-700"
           href="https://github.com/tevnicolas/redacted-gpt">
-          •&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;• Github Project
-          Link •&#32;•&#32;•&#32;•&#32;• •&#32;•&#32;•&#32;•
+          •&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;Github Project
+          Link&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•&#32;•
         </a>
       </div>
     </div>

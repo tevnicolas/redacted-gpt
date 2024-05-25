@@ -25,7 +25,7 @@ export function Display({
     <div className="flex w-[70vw] rounded-[20px] max-w-[800px] [@media(width<=767px)]:w-[100vw] [@media(width<=767px)]:rounded-[0] h-[inherit] bg-mygrey">
       <div className="flex items-end m-10 text-left w-full">
         <ul
-          className="flex flex-col justify-start h-full overflow-y-auto w-full pr-4"
+          className="flex flex-col justify-start h-full overflow-y-auto w-full pr-4 transparent-scroll"
           ref={displayInnerRef}>
           {mailbox.map((message, index) => (
             <ListItem
