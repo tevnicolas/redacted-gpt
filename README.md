@@ -77,6 +77,77 @@ To use RedactedGPT, follow these steps:
    - Submit the prompt to the ChatGPT API by clicking the 'Prompt' button.
    - Wait for successful generation, and then review the AI-generated response.
 
+## Prerequisites (for Development)
+
+Ensure you have the following installed:
+
+- **React**
+- **Vite**
+- **Node.js**
+- **npm**
+- **TypeScript**: Ensure TypeScript is installed globally or it will be installed as part of the project dependencies.
+- **Tailwind CSS**
+- **PostgreSQL**: Install and set up PostgreSQL. Ensure you have a database ready for the application.
+- **AWS Account**: Necessary for hosting the back-end.
+- **Code Editor**: Visual Studio Code (recommended)
+- **Browser**: Google Chrome (recommended for development)
+
+## Installation (for Development)
+
+Follow these steps to set up and run the project:
+
+1. **Clone the repository**:
+
+2. **Install root dependencies**:
+
+   ```sh
+   npm install
+   ```
+
+3. **Install client and server dependencies**:
+
+   ```sh
+   npm run install:client
+   npm run install:server
+   ```
+
+4. **Set up environment variables**:
+
+   - Create a `.env` file in the `server` directory by copying the example file:
+     ```sh
+     cp server/.env.example server/.env
+     ```
+   - Update the `.env` file with necessary environment variables:
+     PORT=8080
+     DATABASE_URL=postgres://USERNAME:PASSWORD@HOST/DATABASE
+     TOKEN_SECRET=YOUR_SECRET_TOKEN
+     OPEN_AI_API_KEY=YOUR_OPENAI_API_KEY
+
+5. **Run the development servers**:
+
+   - To run both client and server concurrently:
+     ```sh
+     npm run dev
+     ```
+   - To run only the client or server:
+     ```sh
+     npm run dev:client
+     npm run dev:server
+     ```
+
+6. **Available Scripts**
+
+- `npm run dev`: Runs both the client and server development servers concurrently.
+- `npm run dev:client`: Runs the client development server using Vite.
+- `npm run dev:server`: Runs the server development server using TSX.
+- `npm run build`: Builds the client project using TypeScript and Vite.
+- `npm run start`: Starts the server in production mode.
+- `npm run lint`: Lints both client and server files.
+- `npm run lint:client`: Lints the client files using ESLint.
+- `npm run lint:server`: Lints the server files using ESLint.
+- `npm run db:import`: Imports database schema and data (assuming you have a `database/import.sh` script).
+- `npm run deploy`: To deploy the application.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -88,3 +159,7 @@ For any questions or feedback, please contact:
 Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
 Project Link: [https://github.com/tevnicolas/redacted-gpt](https://github.com/tevnicolas/redacted-gpt)
+
+```
+
+```
