@@ -159,7 +159,3 @@ For any questions or feedback, please contact:
 Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
 Project Link: [https://github.com/tevnicolas/redacted-gpt](https://github.com/tevnicolas/redacted-gpt)
-
-```
-
-```
