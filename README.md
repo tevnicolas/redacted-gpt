@@ -96,7 +96,7 @@ Ensure you have the following installed:
 
 Follow these steps to set up and run the project:
 
-1. **Clone the repository**:
+1. **Clone the repository**
 
 2. **Install root dependencies**:
 
