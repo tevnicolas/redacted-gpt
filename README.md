@@ -85,12 +85,12 @@ Ensure you have the following installed:
 - **Vite**
 - **Node.js**
 - **npm**
-- **TypeScript**: Ensure TypeScript is installed globally or it will be installed as part of the project dependencies.
+- **TypeScript**
 - **Tailwind CSS**
-- **PostgreSQL**: Install and set up PostgreSQL. Ensure you have a database ready for the application.
+- **PostgreSQL**
 - **AWS Account**: Necessary for hosting the back-end.
 - **Code Editor**: Visual Studio Code (recommended)
-- **Browser**: Google Chrome (recommended for development)
+- **Browser**: Google Chrome (recommended)
 
 ## Installation (for Development)
 
