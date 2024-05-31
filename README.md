@@ -156,6 +156,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 For any questions or feedback, please contact:
 
-Your Name - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
+Tev Nicolas - [tevnicolas@protonmail.com](mailto:tevnicolas@protonmail.com)
 
 Project Link: [https://github.com/tevnicolas/redacted-gpt](https://github.com/tevnicolas/redacted-gpt)
